@@ -21,9 +21,12 @@ rsync, ssh, sftp, scp, mariadb client).
 
 ## Install
 
+Install it from the Software center, or on the leader node:
+
     add-module ghcr.io/stephdl/lemp:latest 1
 
-The output gives the instance name, for example `lemp1`.
+`latest` is the last release, and `1` is the node that runs the instance. The output gives the instance name,
+for example `lemp1`. The commands below use `lemp1`: replace it with your instance name.
 
 ## Configure
 
@@ -72,7 +75,8 @@ nginx ignores `.htaccess` files. `nginx_preset` gives the rewrite rules:
 - `generic`: every unknown path goes to `index.php`, which fits most PHP frameworks.
 - `wordpress`: the same, plus WordPress hardening. `xmlrpc.php` is denied, and PHP files under `wp-content/uploads/` never run.
 
-In both presets, hidden files (`.htaccess`, `.git`, `.env`) are never served.
+In both presets, hidden files (`.htaccess`, `.git`, `.env`) are never served. `.well-known/` stays served,
+because Let's Encrypt and other tools need it.
 
 `document_root` is a subdirectory of `/app`, for example `public` for Laravel or Symfony.
 
@@ -102,7 +106,14 @@ The backup, the restore and the clone keep them.
 | `mariadb/90-custom.cnf` | MariaDB server, start the file with `[mysqld]` | `max_connections = 300` |
 | `crontab` | cron jobs, see [Cron](#cron) | `*/5 * * * * www-data php /app/cron.php` |
 
-nginx ignores `.htaccess` files. Put the rewrite rules of an application in `nginx/custom.d/`.
+nginx ignores `.htaccess` files. Put the rules of an application in a file of `nginx/custom.d/`, for example
+`nginx/custom.d/50-app.conf`. Some Apache rules and their nginx form:
+
+| Apache `.htaccess` | nginx `custom.d` |
+|---|---|
+| `RewriteRule ^old/(.*)$ /new/$1 [R=301,L]` | `rewrite ^/old/(.*)$ /new/$1 permanent;` |
+| `Require all denied` in a `private/` folder | `location ^~ /private/ { deny all; }` |
+| `RewriteRule ^article/([0-9]+)$ index.php?id=$1 [L]` | `location ~ ^/article/([0-9]+)$ { try_files $uri /index.php?id=$1; }` |
 
 Edit the files from the module environment:
 
@@ -143,14 +154,20 @@ The jobs see the `LEMP_*` variables, and `mail()` works from them. Their output 
 
 ## Deploy a site
 
-The site lives in the `app` volume, mounted on `/app` in the PHP containers:
+The site lives in the `app` volume. `php-fpm-app` and `cron-app` mount it on `/app` with write access.
+`nginx-app` mounts it read only and has no tools, so always add files through `php-fpm-app`,
+even for a static site with no PHP. nginx then serves the static files itself.
 
-    runagent -m lemp1 podman exec -ti php-fpm-app bash
+Open a shell as `www-data`, the user of the web server and of PHP:
 
-Download it with git, wget, curl, rsync, sftp, ftp or composer, then give the files to `www-data`:
+    runagent -m lemp1 podman exec -ti -u www-data -w /app php-fpm-app bash
 
-    cd /app
+Download the site with git, wget, curl, rsync, sftp, ftp or composer:
+
     git clone https://example.org/my/site.git .
+
+A shell opened without `-u www-data` runs as root. Then give the files to `www-data` at the end:
+
     chown -R www-data:www-data /app
 
 A fresh instance has an `index.php` page and a `phpinfo.php` page. Delete them once the site is installed.
@@ -159,25 +176,31 @@ that PHP-FPM gives to the site. Never call `phpinfo()` without arguments on a pu
 
 ### WordPress example
 
-Set `nginx_preset` to `wordpress` in the Advanced section of the Settings page, then save.
+1. In Settings, open the Advanced section, set the nginx preset to WordPress, then save.
 
-Download WordPress into the `app` volume, as `www-data`:
+2. Open a shell as `www-data` and download WordPress into the `app` volume:
 
-    runagent -m lemp1 podman exec -ti -u www-data -w /app php-fpm-app bash
-    rm -f index.php phpinfo.php
-    curl -sL https://wordpress.org/latest.tar.gz | tar xz --strip-components=1
+       runagent -m lemp1 podman exec -ti -u www-data -w /app php-fpm-app bash
+       rm -f index.php phpinfo.php
+       curl -sL https://wordpress.org/latest.tar.gz | tar xz --strip-components=1
 
-Create `wp-config.php` from the module variables with [WP-CLI](https://wp-cli.org/), in the same shell:
+3. In the same shell, create `wp-config.php` from the module variables with [WP-CLI](https://wp-cli.org/):
 
-    curl -sLo /tmp/wp https://github.com/wp-cli/wp-cli/releases/download/v2.12.0/wp-cli-2.12.0.phar
-    php /tmp/wp config create --dbname="$LEMP_DB_NAME" --dbuser="$LEMP_DB_USER" \
-        --dbpass="$LEMP_DB_PASSWORD" --dbhost="$LEMP_DB_HOST:$LEMP_DB_PORT" --skip-check
+       curl -sLo /tmp/wp https://github.com/wp-cli/wp-cli/releases/download/v2.12.0/wp-cli-2.12.0.phar
+       php /tmp/wp config create --dbname="$LEMP_DB_NAME" --dbuser="$LEMP_DB_USER" \
+           --dbpass="$LEMP_DB_PASSWORD" --dbhost="$LEMP_DB_HOST:$LEMP_DB_PORT" --skip-check
 
-Then open `https://<host>/` and finish the install in the browser. You can also skip WP-CLI:
-the browser installer asks for the database name, user and password of the module, with `127.0.0.1` as the database host.
+   You can skip this step: the browser installer then asks for the database name, user and password of the
+   module, with `127.0.0.1` as the database host.
 
-Pretty permalinks work with the preset. The site reaches itself through Traefik, so WP-Cron
-and the Site Health loopback test work. WP-CLI in `/tmp` goes away when the container restarts.
+4. Open `https://<host>/` and finish the install: site title, admin user and password.
+   Without Let's Encrypt the certificate is self-signed, and the browser shows a warning first.
+
+Pretty permalinks work with the preset. The site reaches itself through Traefik, so WP-Cron and the Site Health
+loopback test work, and WordPress sends mail through the cluster smarthost. phpMyAdmin stays on
+`https://<host>/phpmyadmin/`, with the `admin` account.
+
+WP-CLI lives in `/tmp` and goes away when the container restarts: download it again to use it.
 
 ## Mail
 
