@@ -41,7 +41,6 @@ Use the Settings page, or `configure-module`. Feed the JSON from stdin, so the p
       "php_max_execution_time": 600,
       "php_timezone": "Europe/Paris",
       "fpm_pm_max_children": 10,
-      "mariadb_innodb_buffer_pool_size": "256M",
       "phpmyadmin_enabled": true,
       "db_name": "app",
       "db_user": "app",
@@ -55,6 +54,14 @@ Use the Settings page, or `configure-module`. Feed the JSON from stdin, so the p
 `db_password` and `admin_password` are required at the first configuration. Later, omit them to keep the current ones.
 They need 8 characters with a lowercase letter, an uppercase letter, a digit and a symbol, like in the UI.
 `db_name` and `db_user` cannot change after the first configuration.
+`php_memory_limit` goes from 128M to 4096M and must be larger than `php_upload_max_filesize`, which goes from 2M
+to 2048M. `fpm_pm_max_children` goes from 1 to 100. `php_max_execution_time` goes up to 3600 seconds, and 0 removes
+the PHP limit: nginx then waits one day for the response, and phpMyAdmin keeps its own 600 seconds.
+The Settings page shows sliders for these values. An update brings older values inside these ranges.
+
+The module sizes the MariaDB InnoDB buffer pool from the node memory: 5%, between 128 MiB and 1 GiB.
+Set `innodb_buffer_pool_size` in `mariadb/90-custom.cnf` to change it. An update moves a buffer pool size set
+in an older release to that file.
 
 HTTPS is always forced on the route.
 

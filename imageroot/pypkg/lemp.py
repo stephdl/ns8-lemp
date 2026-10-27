@@ -5,6 +5,8 @@
 
 # The module settings in one place: configure, clone and restore all read this list
 
+import math
+
 # (configure-module field, environment variable, default, type)
 SETTINGS = [
     ("host", "TRAEFIK_HOST", "", str),
@@ -17,7 +19,6 @@ SETTINGS = [
     ("php_max_execution_time", "PHP_MAX_EXECUTION_TIME", 600, int),
     ("php_timezone", "PHP_TIMEZONE", "UTC", str),
     ("fpm_pm_max_children", "FPM_PM_MAX_CHILDREN", 10, int),
-    ("mariadb_innodb_buffer_pool_size", "MARIADB_INNODB_BUFFER_POOL_SIZE", "256M", str),
     ("phpmyadmin_enabled", "PHPMYADMIN_ENABLED", True, bool),
     ("db_name", "DB_NAME", "app", str),
     ("db_user", "DB_USER", "app", str),
@@ -26,6 +27,43 @@ SETTINGS = [
 ]
 
 ENV_VARS = [var for _, var, _, _ in SETTINGS]
+
+# Ranges of the Settings sliders, enforced by configure-module too
+MEMORY_LIMIT_MIB = (128, 4096)
+UPLOAD_MAX_FILESIZE_MIB = (2, 2048)
+MAX_EXECUTION_TIME = 3600
+FPM_MAX_CHILDREN = (1, 100)
+
+
+def size_mib(size):
+    # PHP size like 512M, 1G or 1536K, in MiB
+    number, unit = int(size[:-1]), size[-1].upper()
+    return number * {"K": 1 / 1024, "M": 1, "G": 1024}[unit]
+
+
+def memory_fits_upload(data):
+    # A whole request body must fit in memory_limit, with room for the script itself
+    return size_mib(data["php_memory_limit"]) > size_mib(data["php_upload_max_filesize"])
+
+
+def clamp_size(size, bounds):
+    low, high = bounds
+    return f"{min(max(math.ceil(size_mib(size)), low), high)}M"
+
+
+def normalize(request):
+    # Bring settings saved by an older release, or set through the API, inside the
+    # current rules: the Settings page can show them and configure-module accepts them
+    request["php_upload_max_filesize"] = clamp_size(request["php_upload_max_filesize"], UPLOAD_MAX_FILESIZE_MIB)
+    request["php_memory_limit"] = clamp_size(request["php_memory_limit"], MEMORY_LIMIT_MIB)
+    if not memory_fits_upload(request):
+        upload = size_mib(request["php_upload_max_filesize"])
+        request["php_memory_limit"] = clamp_size(f"{int(upload) * 2}M", MEMORY_LIMIT_MIB)
+    if request["php_max_execution_time"] != 0:
+        request["php_max_execution_time"] = min(max(request["php_max_execution_time"], 1), MAX_EXECUTION_TIME)
+    low, high = FPM_MAX_CHILDREN
+    request["fpm_pm_max_children"] = min(max(request["fpm_pm_max_children"], low), high)
+    return request
 
 
 def env_from_request(data):
@@ -44,7 +82,7 @@ def request_from_env(env):
             request[field] = value == "True"
         else:
             request[field] = kind(value)
-    return request
+    return normalize(request)
 
 
 def php_image(image_url, version):

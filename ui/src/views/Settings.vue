@@ -279,70 +279,86 @@
                   <h4 class="mg-bottom-md mg-top">
                     {{ $t("settings.php_tuning") }}
                   </h4>
-                  <NsTextInput
+                  <!-- NsSlider reads invalidMessage only when it renders: the key re-renders it on a new error -->
+                  <NsSlider
                     :label="$t('settings.php_memory_limit')"
-                    placeholder="512M"
-                    v-model.trim="phpMemoryLimit"
-                    :helper-text="$t('settings.size_helper')"
-                    :invalid-message="$t(error.php_memory_limit)"
+                    min="128"
+                    max="4096"
+                    step="1"
+                    minLabel=""
+                    maxLabel=""
+                    v-model="phpMemoryLimitMib"
+                    :unitLabel="$t('settings.unit_mib')"
+                    :invalidMessage="$t(error.php_memory_limit)"
+                    :key="'php_memory_limit-' + error.php_memory_limit"
                     :disabled="stillLoading"
-                    class="mg-bottom maxwidth"
+                    class="mg-bottom"
                     ref="php_memory_limit"
                   />
-                  <NsTextInput
+                  <NsSlider
                     :label="$t('settings.php_upload_max_filesize')"
-                    placeholder="100M"
-                    v-model.trim="phpUploadMaxFilesize"
-                    :helper-text="$t('settings.php_upload_max_filesize_helper')"
-                    :invalid-message="$t(error.php_upload_max_filesize)"
+                    min="2"
+                    max="2048"
+                    step="1"
+                    minLabel=""
+                    maxLabel=""
+                    v-model="phpUploadMaxFilesizeMib"
+                    :unitLabel="$t('settings.unit_mib')"
+                    :invalidMessage="$t(error.php_upload_max_filesize)"
+                    :key="
+                      'php_upload_max_filesize-' + error.php_upload_max_filesize
+                    "
                     :disabled="stillLoading"
-                    class="mg-bottom maxwidth"
+                    class="mg-bottom"
                     ref="php_upload_max_filesize"
                   />
-                  <NsTextInput
+                  <NsSlider
                     :label="$t('settings.php_max_execution_time')"
-                    placeholder="600"
-                    v-model.trim="phpMaxExecutionTime"
-                    :helper-text="$t('settings.php_max_execution_time_helper')"
-                    :invalid-message="$t(error.php_max_execution_time)"
+                    min="1"
+                    max="3600"
+                    step="1"
+                    minLabel=""
+                    maxLabel=""
+                    v-model="phpMaxExecutionTime"
+                    :unitLabel="$t('settings.unit_seconds')"
+                    :showUnlimited="true"
+                    :isUnlimited="isExecutionTimeUnlimited"
+                    :unlimitedLabel="$t('settings.unlimited')"
+                    :limitedLabel="$t('settings.limited')"
+                    @unlimited="isExecutionTimeUnlimited = $event"
+                    :invalidMessage="$t(error.php_max_execution_time)"
+                    :key="
+                      'php_max_execution_time-' + error.php_max_execution_time
+                    "
                     :disabled="stillLoading"
-                    class="mg-bottom maxwidth"
+                    class="mg-bottom"
                     ref="php_max_execution_time"
                   />
-                  <NsTextInput
-                    :label="$t('settings.php_timezone')"
-                    placeholder="Europe/Paris"
-                    v-model.trim="phpTimezone"
+                  <NsComboBox
+                    v-model="phpTimezone"
+                    :title="$t('settings.php_timezone')"
+                    :label="$t('settings.choose_php_timezone')"
+                    :options="timezoneOptions"
+                    :autoFilter="true"
+                    :autoHighlight="true"
                     :invalid-message="$t(error.php_timezone)"
                     :disabled="stillLoading"
                     class="mg-bottom maxwidth"
                     ref="php_timezone"
                   />
-                  <NsTextInput
+                  <NsSlider
                     :label="$t('settings.fpm_pm_max_children')"
-                    placeholder="10"
-                    v-model.trim="fpmPmMaxChildren"
-                    :helper-text="$t('settings.fpm_pm_max_children_helper')"
-                    :invalid-message="$t(error.fpm_pm_max_children)"
+                    min="1"
+                    max="100"
+                    step="1"
+                    minLabel=""
+                    maxLabel=""
+                    v-model="fpmPmMaxChildren"
+                    :invalidMessage="$t(error.fpm_pm_max_children)"
+                    :key="'fpm_pm_max_children-' + error.fpm_pm_max_children"
                     :disabled="stillLoading"
-                    class="mg-bottom maxwidth"
+                    class="mg-bottom"
                     ref="fpm_pm_max_children"
-                  />
-
-                  <h4 class="mg-bottom-md mg-top">
-                    {{ $t("settings.mariadb_tuning") }}
-                  </h4>
-                  <NsTextInput
-                    :label="$t('settings.mariadb_innodb_buffer_pool_size')"
-                    placeholder="256M"
-                    v-model.trim="mariadbInnodbBufferPoolSize"
-                    :helper-text="
-                      $t('settings.mariadb_innodb_buffer_pool_size_helper')
-                    "
-                    :invalid-message="$t(error.mariadb_innodb_buffer_pool_size)"
-                    :disabled="stillLoading"
-                    class="mg-bottom maxwidth"
-                    ref="mariadb_innodb_buffer_pool_size"
                   />
 
                   <!-- user domain -->
@@ -491,7 +507,11 @@ import {
 } from "@nethserver/ns8-ui-lib";
 
 const PHP_VERSIONS = ["8.5", "8.4", "8.3", "8.2"];
-const SIZE_PATTERN = /^[1-9][0-9]*[KMG]$/;
+// PHP size like 512M, 1G or 1536K, in whole MiB for the sliders
+function sizeToMib(size) {
+  const factor = { K: 1 / 1024, M: 1, G: 1024 }[size.slice(-1).toUpperCase()];
+  return Math.max(1, Math.ceil(parseInt(size, 10) * factor));
+}
 const NAME_PATTERN = /^[A-Za-z0-9_]+$/;
 // fields shown in the Advanced section
 const ADVANCED_FIELDS = [
@@ -501,7 +521,6 @@ const ADVANCED_FIELDS = [
   "php_max_execution_time",
   "php_timezone",
   "fpm_pm_max_children",
-  "mariadb_innodb_buffer_pool_size",
   "user_domain",
   "mail_from",
 ];
@@ -537,12 +556,13 @@ export default {
       nginxPreset: "",
       phpVersion: "",
       documentRoot: "",
-      phpMemoryLimit: "",
-      phpUploadMaxFilesize: "",
-      phpMaxExecutionTime: "",
+      // the sliders hold plain numbers, sizes in MiB
+      phpMemoryLimitMib: "512",
+      phpUploadMaxFilesizeMib: "100",
+      phpMaxExecutionTime: "600",
+      isExecutionTimeUnlimited: false,
       phpTimezone: "",
-      fpmPmMaxChildren: "",
-      mariadbInnodbBufferPoolSize: "",
+      fpmPmMaxChildren: "10",
       dbName: "",
       dbUser: "",
       dbPassword: "",
@@ -580,7 +600,6 @@ export default {
         php_max_execution_time: "",
         php_timezone: "",
         fpm_pm_max_children: "",
-        mariadb_innodb_buffer_pool_size: "",
         db_name: "",
         db_user: "",
         db_password: "",
@@ -627,6 +646,24 @@ export default {
         name: value,
         label: this.$t("settings.nginx_preset_" + value),
         value,
+      }));
+    },
+    timezoneOptions() {
+      // Older browsers have no list: offer UTC and the current zone only
+      const zones = new Set(
+        typeof Intl.supportedValuesOf === "function"
+          ? Intl.supportedValuesOf("timeZone")
+          : []
+      );
+      // UTC is not in the canonical list, and a zone set from the API may be missing too
+      zones.add("UTC");
+      if (this.phpTimezone) {
+        zones.add(this.phpTimezone);
+      }
+      return [...zones].sort().map((zone) => ({
+        name: zone,
+        label: zone,
+        value: zone,
       }));
     },
     phpVersionOptions() {
@@ -783,12 +820,14 @@ export default {
       this.nginxPreset = config.nginx_preset;
       this.documentRoot = config.document_root;
       this.phpVersion = config.php_version;
-      this.phpMemoryLimit = config.php_memory_limit;
-      this.phpUploadMaxFilesize = config.php_upload_max_filesize;
-      this.phpMaxExecutionTime = String(config.php_max_execution_time);
+      this.phpMemoryLimitMib = String(sizeToMib(config.php_memory_limit));
+      this.phpUploadMaxFilesizeMib = String(
+        sizeToMib(config.php_upload_max_filesize)
+      );
+      this.isExecutionTimeUnlimited = config.php_max_execution_time === 0;
+      this.phpMaxExecutionTime = String(config.php_max_execution_time || 600);
       this.phpTimezone = config.php_timezone;
       this.fpmPmMaxChildren = String(config.fpm_pm_max_children);
-      this.mariadbInnodbBufferPoolSize = config.mariadb_innodb_buffer_pool_size;
       this.dbName = config.db_name;
       this.dbUser = config.db_user;
       this.isDbPasswordSet = config.db_password_set;
@@ -851,30 +890,40 @@ export default {
       if (!this.phpVersion) {
         fail("php_version", "common.required");
       }
-      for (const [field, value] of [
-        ["php_memory_limit", this.phpMemoryLimit],
-        ["php_upload_max_filesize", this.phpUploadMaxFilesize],
-        ["mariadb_innodb_buffer_pool_size", this.mariadbInnodbBufferPoolSize],
+      const isCount = (value) => /^[1-9][0-9]*$/.test(value);
+      for (const [field, value, low, high] of [
+        ["php_memory_limit", this.phpMemoryLimitMib, 128, 4096],
+        ["php_upload_max_filesize", this.phpUploadMaxFilesizeMib, 2, 2048],
       ]) {
-        if (!SIZE_PATTERN.test(value)) {
+        if (!isCount(value)) {
           fail(field, "settings.size_invalid");
+        } else if (Number(value) < low || Number(value) > high) {
+          fail(field, `settings.${field}_out_of_range`);
         }
       }
       if (
-        !/^[1-9][0-9]*$/.test(this.phpMaxExecutionTime) ||
-        Number(this.phpMaxExecutionTime) > 86400
+        isCount(this.phpMemoryLimitMib) &&
+        isCount(this.phpUploadMaxFilesizeMib) &&
+        Number(this.phpMemoryLimitMib) <= Number(this.phpUploadMaxFilesizeMib)
+      ) {
+        fail("php_memory_limit", "settings.php_memory_limit_too_low");
+      }
+      if (
+        !this.isExecutionTimeUnlimited &&
+        (!isCount(this.phpMaxExecutionTime) ||
+          Number(this.phpMaxExecutionTime) > 3600)
       ) {
         fail(
           "php_max_execution_time",
           "settings.php_max_execution_time_invalid"
         );
       }
-      if (!/^[A-Za-z0-9_+/-]+$/.test(this.phpTimezone)) {
-        fail("php_timezone", "settings.php_timezone_invalid");
+      if (!this.phpTimezone) {
+        fail("php_timezone", "common.required");
       }
       if (
-        !/^[1-9][0-9]*$/.test(this.fpmPmMaxChildren) ||
-        Number(this.fpmPmMaxChildren) > 500
+        !isCount(this.fpmPmMaxChildren) ||
+        Number(this.fpmPmMaxChildren) > 100
       ) {
         fail("fpm_pm_max_children", "settings.fpm_pm_max_children_invalid");
       }
@@ -989,12 +1038,13 @@ export default {
         nginx_preset: this.nginxPreset,
         document_root: this.documentRoot.replace(/^\/+|\/+$/g, ""),
         php_version: this.phpVersion,
-        php_memory_limit: this.phpMemoryLimit,
-        php_upload_max_filesize: this.phpUploadMaxFilesize,
-        php_max_execution_time: Number(this.phpMaxExecutionTime),
+        php_memory_limit: this.phpMemoryLimitMib + "M",
+        php_upload_max_filesize: this.phpUploadMaxFilesizeMib + "M",
+        php_max_execution_time: this.isExecutionTimeUnlimited
+          ? 0
+          : Number(this.phpMaxExecutionTime),
         php_timezone: this.phpTimezone,
         fpm_pm_max_children: Number(this.fpmPmMaxChildren),
-        mariadb_innodb_buffer_pool_size: this.mariadbInnodbBufferPoolSize,
         phpmyadmin_enabled: this.isPhpmyadminEnabled,
         db_name: this.dbName,
         db_user: this.dbUser,
