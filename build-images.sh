@@ -28,6 +28,7 @@ php_images=(
     "docker.io/php:8.5.12-fpm-trixie"
 )
 composer_image="docker.io/composer:2.10.3"
+node_image="docker.io/library/node:24.22.1"
 extension_installer_image="docker.io/mlocati/php-extension-installer:2.12.3"
 
 # The About page shows the stack versions: the module version does not tell them
@@ -72,7 +73,7 @@ container=$(buildah from scratch)
 # Reuse existing nodebuilder-lemp container, to speed up builds
 if ! buildah containers --format "{{.ContainerName}}" | grep -q nodebuilder-lemp; then
     echo "Pulling NodeJS runtime..."
-    buildah from --name nodebuilder-lemp -v "${PWD}:/usr/src:Z" docker.io/library/node:lts
+    buildah from --name nodebuilder-lemp -v "${PWD}:/usr/src:Z" "${node_image}"
 fi
 
 echo "Build static UI files with node..."
