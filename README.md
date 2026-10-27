@@ -168,7 +168,7 @@ A clone keeps the host name of its source but gets no web route: set a new host 
 
 ## Volumes
 
-`app` and `mysql-data` can go on an additional disk (`org.nethserver.volumes`).
+`app` and `mariadb-data` can go on an additional disk (`org.nethserver.volumes`).
 
 ## Uninstall
 

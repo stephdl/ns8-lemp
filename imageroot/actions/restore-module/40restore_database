@@ -26,7 +26,7 @@ podman run \
   --interactive \
   --network=none \
   --volume=./initdb.d:/docker-entrypoint-initdb.d:z \
-  --volume mysql-data:/var/lib/mysql/:Z \
+  --volume mariadb-data:/var/lib/mysql/:Z \
   --env-file=secrets/mariadb.env \
   --env MARIADB_ROOT_HOST=localhost \
   --replace --name=restore_db \

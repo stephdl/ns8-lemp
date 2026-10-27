@@ -94,7 +94,7 @@ buildah config --entrypoint=/ \
     --label="org.nethserver.rootfull=0" \
     --label="org.nethserver.min-core=3.20.1" \
     --label="org.nethserver.images=${mariadb_image} ${nginx_image} ${phpmyadmin_image}" \
-    --label="org.nethserver.volumes=app mysql-data" \
+    --label="org.nethserver.volumes=app mariadb-data" \
     "${container}"
 # Commit the image
 buildah commit "${container}" "${repobase}/${reponame}"

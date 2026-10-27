@@ -18,7 +18,7 @@ ExecStartPre=/bin/rm -f %t/mariadb-app.pid %t/mariadb-app.ctr-id
 ExecStart=/usr/bin/podman run --conmon-pidfile %t/mariadb-app.pid \
     --cidfile %t/mariadb-app.ctr-id --cgroups=no-conmon \
     --pod-id-file %t/lemp.pod-id --replace -d --name mariadb-app \
-    --volume mysql-data:/var/lib/mysql/:Z \
+    --volume mariadb-data:/var/lib/mysql/:Z \
     --volume %S/state/mariadb:/etc/mysql/conf.d:ro,Z \
     --env-file=%S/state/secrets/mariadb.env \
     --env MARIADB_ROOT_HOST=localhost \
