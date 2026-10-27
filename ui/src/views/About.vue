@@ -71,7 +71,24 @@
                 ></cv-skeleton-text>
                 <span v-else>
                   {{ version }}
+                  <template v-if="app.upstream_name">
+                    ({{ app.upstream_name }})</template
+                  >
                 </span>
+              </span>
+            </div>
+            <div
+              v-for="item in stackVersions"
+              :key="item.name"
+              class="key-value-setting"
+            >
+              <span class="label">{{ item.name }}</span>
+              <span class="value">
+                <cv-skeleton-text
+                  v-if="loading.getConfiguration"
+                  class="version-skeleton"
+                ></cv-skeleton-text>
+                <span v-else>{{ item.version || "-" }}</span>
               </span>
             </div>
             <div class="key-value-setting">
@@ -183,24 +200,36 @@ export default {
       urlCheckInterval: null,
       app: null,
       version: "",
+      versions: {},
       error: {
         moduleInfo: "",
         version: "",
+        getConfiguration: "",
       },
       loading: {
         moduleInfo: true,
         version: true,
+        getConfiguration: true,
       },
     };
   },
   computed: {
     ...mapState(["core", "appName", "instanceName"]),
+    stackVersions() {
+      return [
+        { name: "nginx", version: this.versions.nginx },
+        { name: "PHP-FPM", version: this.versions.php },
+        { name: "MariaDB", version: this.versions.mariadb },
+        { name: "phpMyAdmin", version: this.versions.phpmyadmin },
+      ];
+    },
   },
   created() {
     this.getModuleInfo();
 
     // needed to retrieve module version
     this.listInstalledModules();
+    this.getConfiguration();
   },
   beforeRouteEnter(to, from, next) {
     next((vm) => {
@@ -213,6 +242,45 @@ export default {
     next();
   },
   methods: {
+    async getConfiguration() {
+      this.loading.getConfiguration = true;
+      this.error.getConfiguration = "";
+      const taskAction = "get-configuration";
+      const eventId = this.getUuid();
+      this.core.$root.$once(
+        `${taskAction}-aborted-${eventId}`,
+        this.getConfigurationAborted
+      );
+      this.core.$root.$once(
+        `${taskAction}-completed-${eventId}`,
+        this.getConfigurationCompleted
+      );
+      const res = await to(
+        this.createModuleTaskForApp(this.instanceName, {
+          action: taskAction,
+          extra: {
+            title: this.$t("action." + taskAction),
+            isNotificationHidden: true,
+            eventId,
+          },
+        })
+      );
+      const err = res[0];
+      if (err) {
+        console.error(`error creating task ${taskAction}`, err);
+        this.error.getConfiguration = this.getErrorMessage(err);
+        this.loading.getConfiguration = false;
+      }
+    },
+    getConfigurationAborted(taskResult, taskContext) {
+      console.error(`${taskContext.action} aborted`, taskResult);
+      this.error.getConfiguration = this.$t("error.generic_error");
+      this.loading.getConfiguration = false;
+    },
+    getConfigurationCompleted(taskContext, taskResult) {
+      this.versions = taskResult.output.versions;
+      this.loading.getConfiguration = false;
+    },
     getModuleInfo() {
       this.loading.moduleInfo = true;
       const metadata = require("../../public/metadata.json");
