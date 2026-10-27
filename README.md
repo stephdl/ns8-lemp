@@ -220,6 +220,12 @@ uploads, the cache and the updates. Keep files at `644` and folders at `755`, th
 nginx runs as another user, `nginx` (uid 101), and serves the static files itself, so it needs the read right
 for others: a static file at `600` answers 403. A secret that only PHP reads, like `wp-config.php`, can be `600`.
 
+To fix the owner and the modes of the whole site, run as root:
+
+    runagent -m lemp1 podman exec php-fpm-app sh -c 'chown -R www-data:www-data /app && find /app -type d -exec chmod 755 {} + && find /app -type f -exec chmod 644 {} +'
+
+It also sets the secrets back to `644`: run `chmod 600` on them again afterwards.
+
 A fresh instance has an `index.php` page and a `phpinfo.php` page. Delete them once the site is installed.
 `phpinfo.php` leaves out the Environment and Variables sections: they would show the database password
 that PHP-FPM gives to the site. Never call `phpinfo()` without arguments on a public page.
