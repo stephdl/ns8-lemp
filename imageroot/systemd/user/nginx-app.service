@@ -14,13 +14,14 @@ EnvironmentFile=%S/state/environment
 Restart=always
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/nginx-app.pid %t/nginx-app.ctr-id
+# The whole phpMyAdmin image is mounted: podman before 5.1 (Debian 12) has no subpath for image mounts
 ExecStart=/usr/bin/podman run --conmon-pidfile %t/nginx-app.pid \
     --cidfile %t/nginx-app.ctr-id --cgroups=no-conmon \
     --pod-id-file %t/lemp.pod-id --replace -d --name nginx-app \
     --volume app:/app:ro,z \
     --volume %S/state/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro,Z \
     --volume %S/state/nginx/custom.d:/etc/nginx/lemp-custom.d:ro,Z \
-    --mount type=image,source=${PHPMYADMIN_IMAGE},destination=/srv/phpmyadmin,subpath=/var/www/html \
+    --mount type=image,source=${PHPMYADMIN_IMAGE},destination=/srv/phpmyadmin \
     --env NGINX_ENTRYPOINT_QUIET_LOGS=1 \
     ${NGINX_IMAGE}
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/nginx-app.ctr-id -t 10

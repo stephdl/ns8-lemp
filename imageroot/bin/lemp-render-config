@@ -108,11 +108,11 @@ if env["PHPMYADMIN_ENABLED"] == "True":
     phpmyadmin_locations = f"""
     location = /phpmyadmin {{ return 301 /phpmyadmin/; }}
     location ^~ /phpmyadmin/ {{
-        alias /srv/phpmyadmin/;
+        alias /srv/phpmyadmin/var/www/html/;
         index index.php;
         location ~ ^/phpmyadmin/(libraries|setup|templates|vendor)/ {{ deny all; }}
         location ~ ^/phpmyadmin/(.+\\.php)$ {{
-            alias /srv/phpmyadmin/$1;
+            alias /srv/phpmyadmin/var/www/html/$1;
             fastcgi_pass 127.0.0.1:9001;
 {fastcgi_common}
             fastcgi_param SCRIPT_FILENAME /var/www/html/$1;
