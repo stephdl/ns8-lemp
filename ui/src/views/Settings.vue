@@ -86,16 +86,6 @@
               "
               :showCloseButton="false"
             />
-            <NsTextInput
-              :label="$t('settings.document_root')"
-              placeholder="public"
-              v-model.trim="documentRoot"
-              :helper-text="$t('settings.document_root_helper')"
-              :invalid-message="$t(error.document_root)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="document_root"
-            />
 
             <!-- PHP -->
             <h4 class="mg-bottom-md mg-top">{{ $t("settings.php") }}</h4>
@@ -263,6 +253,16 @@
                 <template slot="title">{{ $t("settings.advanced") }}</template>
                 <template slot="content">
                   <h4 class="mg-bottom-md">{{ $t("settings.web_server") }}</h4>
+                  <NsTextInput
+                    :label="$t('settings.document_root')"
+                    placeholder="public"
+                    v-model.trim="documentRoot"
+                    :helper-text="$t('settings.document_root_helper')"
+                    :invalid-message="$t(error.document_root)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="document_root"
+                  />
                   <NsComboBox
                     v-model="nginxPreset"
                     :title="$t('settings.nginx_preset')"
@@ -515,6 +515,7 @@ function sizeToMib(size) {
 const NAME_PATTERN = /^[A-Za-z0-9_]+$/;
 // fields shown in the Advanced section
 const ADVANCED_FIELDS = [
+  "document_root",
   "nginx_preset",
   "php_memory_limit",
   "php_upload_max_filesize",
