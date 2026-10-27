@@ -27,7 +27,8 @@ agent.set_env("PHPMYADMIN_ENABLED", data["phpmyadmin_enabled"])
 agent.set_env("DB_NAME", data["db_name"])
 agent.set_env("DB_USER", data["db_user"])
 agent.set_env("USER_DOMAIN", data["user_domain"])
-agent.set_env("MAIL_FROM", data["mail_from"] or "noreply@" + data["host"])
+# Empty keeps the sender on the current host name, see lemp-entrypoint
+agent.set_env("MAIL_FROM", data["mail_from"])
 
 
 def write_secret(path, key, value):
