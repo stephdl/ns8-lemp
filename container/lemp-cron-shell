@@ -6,5 +6,6 @@
 #
 
 # cron runs each job with this shell: give the job the module variables
+exec >> /run/lemp-cron.pipe 2>&1
 source /etc/lemp/cron.env
 exec /bin/sh "$@"
