@@ -33,7 +33,8 @@
     "search_volumes": "Volumes zoeken",
     "website": "Website",
     "stack": "Stack",
-    "open_phpmyadmin": "phpMyAdmin openen"
+    "open_phpmyadmin": "phpMyAdmin openen",
+    "phpmyadmin_disabled": "Uitgeschakeld"
   },
   "about": {
     "title": "Over"
@@ -107,7 +108,7 @@
     "fpm_pm_max_children_invalid": "Gebruik een getal tussen 1 en 500",
     "database": "Database",
     "database_info_title": "Database van de website",
-    "database_info_description": "De module maakt deze MariaDB-database en -gebruiker aan. PHP leest ze in de variabelen LEMP_DB_HOST, LEMP_DB_PORT, LEMP_DB_NAME, LEMP_DB_USER en LEMP_DB_PASSWORD. De naam en de gebruiker kunnen na de eerste keer opslaan niet meer veranderen.",
+    "database_info_description": "PHP leest ze in de variabelen LEMP_DB_*. De naam en de gebruiker kunnen na de eerste keer opslaan niet meer veranderen.",
     "db_name": "Databasenaam",
     "db_name_helper": "Letters, cijfers en underscores",
     "db_name_invalid": "Gebruik letters, cijfers en underscores, maximaal 64 tekens",

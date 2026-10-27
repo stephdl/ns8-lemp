@@ -33,7 +33,8 @@
     "search_volumes": "Procurar volumes",
     "website": "Site",
     "stack": "Pilha de software",
-    "open_phpmyadmin": "Abrir o phpMyAdmin"
+    "open_phpmyadmin": "Abrir o phpMyAdmin",
+    "phpmyadmin_disabled": "Desativado"
   },
   "about": {
     "title": "Sobre"
@@ -107,7 +108,7 @@
     "fpm_pm_max_children_invalid": "Use um número entre 1 e 500",
     "database": "Banco de dados",
     "database_info_title": "Banco de dados do site",
-    "database_info_description": "O módulo cria este banco e este usuário MariaDB. O PHP os lê nas variáveis LEMP_DB_HOST, LEMP_DB_PORT, LEMP_DB_NAME, LEMP_DB_USER e LEMP_DB_PASSWORD. O nome e o usuário não mudam depois do primeiro salvamento.",
+    "database_info_description": "O PHP os lê nas variáveis LEMP_DB_*. O nome e o usuário não podem mudar depois do primeiro salvamento.",
     "db_name": "Nome do banco",
     "db_name_helper": "Letras, números e sublinhados",
     "db_name_invalid": "Use letras, números e sublinhados, no máximo 64 caracteres",

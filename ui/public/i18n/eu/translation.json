@@ -33,7 +33,8 @@
     "search_volumes": "Bilatu bolumenak",
     "website": "Webgunea",
     "stack": "Software pila",
-    "open_phpmyadmin": "Ireki phpMyAdmin"
+    "open_phpmyadmin": "Ireki phpMyAdmin",
+    "phpmyadmin_disabled": "Desgaituta"
   },
   "about": {
     "title": "Honi buruz"
@@ -107,7 +108,7 @@
     "fpm_pm_max_children_invalid": "Erabili 1 eta 500 arteko zenbakia",
     "database": "Datu-basea",
     "database_info_title": "Webgunearen datu-basea",
-    "database_info_description": "Moduluak MariaDB datu-base eta erabiltzaile hau sortzen ditu. PHP-k LEMP_DB_HOST, LEMP_DB_PORT, LEMP_DB_NAME, LEMP_DB_USER eta LEMP_DB_PASSWORD aldagaietan irakurtzen ditu. Izena eta erabiltzailea ez dira aldatzen lehen gordetzearen ondoren.",
+    "database_info_description": "PHPk LEMP_DB_* aldagaietan irakurtzen ditu. Izena eta erabiltzailea ezin dira aldatu lehen gordetzearen ondoren.",
     "db_name": "Datu-basearen izena",
     "db_name_helper": "Letrak, zifrak eta azpimarrak",
     "db_name_invalid": "Erabili letrak, zifrak eta azpimarrak, gehienez 64 karaktere",

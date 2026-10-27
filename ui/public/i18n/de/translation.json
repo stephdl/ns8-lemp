@@ -33,7 +33,8 @@
     "search_volumes": "Volumes suchen",
     "website": "Website",
     "stack": "Stack",
-    "open_phpmyadmin": "phpMyAdmin öffnen"
+    "open_phpmyadmin": "phpMyAdmin öffnen",
+    "phpmyadmin_disabled": "Deaktiviert"
   },
   "about": {
     "title": "Über"
@@ -107,7 +108,7 @@
     "fpm_pm_max_children_invalid": "Verwenden Sie eine Zahl zwischen 1 und 500",
     "database": "Datenbank",
     "database_info_title": "Datenbank der Website",
-    "database_info_description": "Das Modul legt diese MariaDB-Datenbank und diesen Benutzer an. PHP liest sie aus den Variablen LEMP_DB_HOST, LEMP_DB_PORT, LEMP_DB_NAME, LEMP_DB_USER und LEMP_DB_PASSWORD. Name und Benutzer ändern sich nach dem ersten Speichern nicht mehr.",
+    "database_info_description": "PHP liest sie aus den Variablen LEMP_DB_*. Name und Benutzer können nach dem ersten Speichern nicht mehr geändert werden.",
     "db_name": "Datenbankname",
     "db_name_helper": "Buchstaben, Ziffern und Unterstriche",
     "db_name_invalid": "Verwenden Sie Buchstaben, Ziffern und Unterstriche, höchstens 64 Zeichen",

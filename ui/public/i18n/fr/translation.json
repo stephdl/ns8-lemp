@@ -33,7 +33,8 @@
     "search_volumes": "Rechercher des volumes",
     "website": "Site web",
     "stack": "Pile logicielle",
-    "open_phpmyadmin": "Ouvrir phpMyAdmin"
+    "open_phpmyadmin": "Ouvrir phpMyAdmin",
+    "phpmyadmin_disabled": "Désactivé"
   },
   "about": {
     "title": "À propos"
@@ -107,7 +108,7 @@
     "fpm_pm_max_children_invalid": "Utilisez un nombre entre 1 et 500",
     "database": "Base de données",
     "database_info_title": "Base du site",
-    "database_info_description": "Le module crée cette base et cet utilisateur MariaDB. PHP les lit dans les variables LEMP_DB_HOST, LEMP_DB_PORT, LEMP_DB_NAME, LEMP_DB_USER et LEMP_DB_PASSWORD. Le nom et l'utilisateur ne changent plus après le premier enregistrement.",
+    "database_info_description": "PHP les lit dans les variables LEMP_DB_*. Le nom et l'utilisateur ne peuvent plus changer après le premier enregistrement.",
     "db_name": "Nom de la base",
     "db_name_helper": "Lettres, chiffres et tirets bas",
     "db_name_invalid": "Utilisez des lettres, chiffres et tirets bas, 64 caractères au plus",
