@@ -100,7 +100,7 @@
     "php_max_execution_time_invalid": "Gebruik een aantal seconden tussen 1 en 3600",
     "php_timezone": "Tijdzone",
     "fpm_pm_max_children": "Maximum aantal PHP-FPM-workers",
-    "fpm_pm_max_children_invalid": "Gebruik een getal tussen 1 en 500",
+    "fpm_pm_max_children_invalid": "Gebruik een getal tussen 1 en 100",
     "database": "Database",
     "database_info_title": "Database van de website",
     "database_info_description": "PHP leest ze in de variabelen LEMP_DB_*. De naam en de gebruiker kunnen na de eerste keer opslaan niet meer veranderen.",
@@ -159,6 +159,8 @@
     "unlimited": "Onbeperkt",
     "limited": "Beperkt",
     "php_memory_limit_too_low": "De geheugenlimiet moet groter zijn dan de uploadlimiet",
-    "choose_php_timezone": "Kies een tijdzone"
+    "choose_php_timezone": "Kies een tijdzone",
+    "php_memory_limit_out_of_range": "Gebruik een geheugenlimiet tussen 128 en 4096 MiB",
+    "php_upload_max_filesize_out_of_range": "Gebruik een uploadlimiet tussen 2 en 2048 MiB"
   }
 }

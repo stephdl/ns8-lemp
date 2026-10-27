@@ -314,7 +314,7 @@
                   />
                   <NsSlider
                     :label="$t('settings.php_max_execution_time')"
-                    min="30"
+                    min="1"
                     max="3600"
                     step="1"
                     minLabel=""
@@ -510,7 +510,7 @@ const PHP_VERSIONS = ["8.5", "8.4", "8.3", "8.2"];
 // PHP size like 512M, 1G or 1536K, in whole MiB for the sliders
 function sizeToMib(size) {
   const factor = { K: 1 / 1024, M: 1, G: 1024 }[size.slice(-1).toUpperCase()];
-  return Math.max(1, Math.round(parseInt(size, 10) * factor));
+  return Math.max(1, Math.ceil(parseInt(size, 10) * factor));
 }
 const NAME_PATTERN = /^[A-Za-z0-9_]+$/;
 // fields shown in the Advanced section
@@ -649,7 +649,12 @@ export default {
       }));
     },
     timezoneOptions() {
-      const zones = new Set(Intl.supportedValuesOf("timeZone"));
+      // Older browsers have no list: offer UTC and the current zone only
+      const zones = new Set(
+        typeof Intl.supportedValuesOf === "function"
+          ? Intl.supportedValuesOf("timeZone")
+          : []
+      );
       // UTC is not in the canonical list, and a zone set from the API may be missing too
       zones.add("UTC");
       if (this.phpTimezone) {
@@ -886,13 +891,14 @@ export default {
         fail("php_version", "common.required");
       }
       const isCount = (value) => /^[1-9][0-9]*$/.test(value);
-      for (const field of ["php_memory_limit", "php_upload_max_filesize"]) {
-        const value =
-          field === "php_memory_limit"
-            ? this.phpMemoryLimitMib
-            : this.phpUploadMaxFilesizeMib;
+      for (const [field, value, low, high] of [
+        ["php_memory_limit", this.phpMemoryLimitMib, 128, 4096],
+        ["php_upload_max_filesize", this.phpUploadMaxFilesizeMib, 2, 2048],
+      ]) {
         if (!isCount(value)) {
           fail(field, "settings.size_invalid");
+        } else if (Number(value) < low || Number(value) > high) {
+          fail(field, `settings.${field}_out_of_range`);
         }
       }
       if (
@@ -917,7 +923,7 @@ export default {
       }
       if (
         !isCount(this.fpmPmMaxChildren) ||
-        Number(this.fpmPmMaxChildren) > 500
+        Number(this.fpmPmMaxChildren) > 100
       ) {
         fail("fpm_pm_max_children", "settings.fpm_pm_max_children_invalid");
       }

@@ -100,7 +100,7 @@
     "php_max_execution_time_invalid": "استخدم عدد ثوانٍ بين 1 و 3600",
     "php_timezone": "المنطقة الزمنية",
     "fpm_pm_max_children": "أقصى عدد لعمليات PHP-FPM",
-    "fpm_pm_max_children_invalid": "استخدم رقماً بين 1 و 500",
+    "fpm_pm_max_children_invalid": "استخدم رقماً بين 1 و 100",
     "database": "قاعدة البيانات",
     "database_info_title": "قاعدة بيانات الموقع",
     "database_info_description": "يقرؤها PHP في المتغيرات LEMP_DB_*. لا يمكن تغيير الاسم والمستخدم بعد أول حفظ.",
@@ -159,6 +159,8 @@
     "unlimited": "غير محدود",
     "limited": "محدود",
     "php_memory_limit_too_low": "يجب أن يكون حد الذاكرة أكبر من حد حجم الرفع",
-    "choose_php_timezone": "اختر منطقة زمنية"
+    "choose_php_timezone": "اختر منطقة زمنية",
+    "php_memory_limit_out_of_range": "استخدم حد ذاكرة بين 128 و 4096 ميبيبايت",
+    "php_upload_max_filesize_out_of_range": "استخدم حد رفع بين 2 و 2048 ميبيبايت"
   }
 }

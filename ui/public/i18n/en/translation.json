@@ -100,7 +100,7 @@
     "php_max_execution_time_invalid": "Use a number of seconds between 1 and 3600",
     "php_timezone": "Time zone",
     "fpm_pm_max_children": "Maximum PHP-FPM workers",
-    "fpm_pm_max_children_invalid": "Use a number between 1 and 500",
+    "fpm_pm_max_children_invalid": "Use a number between 1 and 100",
     "database": "Database",
     "database_info_title": "Site database",
     "database_info_description": "PHP reads them in the LEMP_DB_* variables. The name and user cannot change after the first save.",
@@ -159,6 +159,8 @@
     "unlimited": "Unlimited",
     "limited": "Limited",
     "php_memory_limit_too_low": "The memory limit must be larger than the upload size limit",
-    "choose_php_timezone": "Choose a time zone"
+    "choose_php_timezone": "Choose a time zone",
+    "php_memory_limit_out_of_range": "Use a memory limit between 128 and 4096 MiB",
+    "php_upload_max_filesize_out_of_range": "Use an upload size limit between 2 and 2048 MiB"
   }
 }

@@ -100,7 +100,7 @@
     "php_max_execution_time_invalid": "Erabili 1 eta 3600 arteko segundo kopurua",
     "php_timezone": "Ordu-zona",
     "fpm_pm_max_children": "PHP-FPM prozesu kopuru maximoa",
-    "fpm_pm_max_children_invalid": "Erabili 1 eta 500 arteko zenbakia",
+    "fpm_pm_max_children_invalid": "Erabili 1 eta 100 arteko zenbaki bat",
     "database": "Datu-basea",
     "database_info_title": "Webgunearen datu-basea",
     "database_info_description": "PHPk LEMP_DB_* aldagaietan irakurtzen ditu. Izena eta erabiltzailea ezin dira aldatu lehen gordetzearen ondoren.",
@@ -159,6 +159,8 @@
     "unlimited": "Mugagabea",
     "limited": "Mugatua",
     "php_memory_limit_too_low": "Memoria-mugak igoera-muga baino handiagoa izan behar du",
-    "choose_php_timezone": "Aukeratu ordu-eremu bat"
+    "choose_php_timezone": "Aukeratu ordu-eremu bat",
+    "php_memory_limit_out_of_range": "Erabili 128 eta 4096 MiB arteko memoria-muga",
+    "php_upload_max_filesize_out_of_range": "Erabili 2 eta 2048 MiB arteko igoera-muga"
   }
 }

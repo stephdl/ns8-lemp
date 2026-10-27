@@ -100,7 +100,7 @@
     "php_max_execution_time_invalid": "Utilisez un nombre de secondes entre 1 et 3600",
     "php_timezone": "Fuseau horaire",
     "fpm_pm_max_children": "Nombre maximal de processus PHP-FPM",
-    "fpm_pm_max_children_invalid": "Utilisez un nombre entre 1 et 500",
+    "fpm_pm_max_children_invalid": "Utilisez un nombre entre 1 et 100",
     "database": "Base de données",
     "database_info_title": "Base du site",
     "database_info_description": "PHP les lit dans les variables LEMP_DB_*. Le nom et l'utilisateur ne peuvent plus changer après le premier enregistrement.",
@@ -159,6 +159,8 @@
     "unlimited": "Illimité",
     "limited": "Limité",
     "php_memory_limit_too_low": "La limite mémoire doit être supérieure à la taille maximale d'envoi",
-    "choose_php_timezone": "Choisissez un fuseau horaire"
+    "choose_php_timezone": "Choisissez un fuseau horaire",
+    "php_memory_limit_out_of_range": "Utilisez une limite mémoire entre 128 et 4096 Mio",
+    "php_upload_max_filesize_out_of_range": "Utilisez une taille d'envoi entre 2 et 2048 Mio"
   }
 }
