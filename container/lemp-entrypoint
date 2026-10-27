@@ -1,0 +1,54 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+set -e
+
+# A fresh volume gets the sample pages, an existing site is never touched
+if [[ "$1" == "php-fpm" && -z "$(ls -A /app)" ]]; then
+    cp /usr/local/share/lemp/index.php /usr/local/share/lemp/phpinfo.php /app/
+    chown -R www-data:www-data /app
+fi
+
+# Cron jobs start with an empty environment: pam_env gives them this file
+if [[ "$1" == "cron" ]]; then
+    env | grep -E '^(LEMP_|NS8_HOSTNAME=|MAIL_FROM=)' > /etc/environment || :
+    chmod 0644 /etc/environment
+fi
+
+rm -f /etc/msmtprc
+if [[ -n "${SMTP_ENABLED}" && -n "${SMTP_HOST}" ]]; then
+    case "${SMTP_ENCRYPTION}" in
+        tls) tls=on starttls=off ;;
+        starttls) tls=on starttls=on ;;
+        *) tls=off starttls=off ;;
+    esac
+    {
+        echo "defaults"
+        echo "domain ${NS8_HOSTNAME:-localhost}"
+        echo "syslog off"
+        echo "account default"
+        echo "host ${SMTP_HOST}"
+        echo "port ${SMTP_PORT}"
+        echo "tls ${tls}"
+        echo "tls_starttls ${starttls}"
+        echo "tls_certcheck $([[ -n "${SMTP_TLSVERIFY}" ]] && echo on || echo off)"
+        echo "from ${MAIL_FROM:-noreply@${NS8_HOSTNAME:-localhost}}"
+        if [[ -n "${SMTP_USERNAME}" ]]; then
+            echo "auth on"
+            echo "user ${SMTP_USERNAME}"
+            echo "password ${SMTP_PASSWORD}"
+        else
+            echo "auth off"
+        fi
+    } > /etc/msmtprc
+    # mail() runs msmtp as www-data, which must read the file
+    chown root:www-data /etc/msmtprc
+    chmod 0640 /etc/msmtprc
+fi
+unset SMTP_PASSWORD SMTP_USERNAME
+
+exec docker-php-entrypoint "$@"
