@@ -7,9 +7,9 @@
 
 set -e
 
-# A fresh volume gets the sample pages, an existing site is never touched
+# A fresh volume gets the sample page, an existing site is never touched
 if [[ "$1" == "php-fpm" && -z "$(ls -A /app)" ]]; then
-    cp /usr/local/share/lemp/index.php /usr/local/share/lemp/phpinfo.php /app/
+    cp /usr/local/share/lemp/index.php /app/
     chown -R www-data:www-data /app
 fi
 
