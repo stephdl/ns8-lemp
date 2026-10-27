@@ -14,9 +14,10 @@ The pod runs these containers:
 | `phpmyadmin-app` | `docker.io/phpmyadmin:5.2.3-fpm` | phpMyAdmin on `/phpmyadmin/`, enabled by default |
 
 PHP 8.2, 8.3, 8.4 and 8.5 are available. Only the image of the selected version is pulled on the node.
-The PHP image has the same extensions as ns8-lamp (gd, intl, ldap, imagick, imap, apcu, memcached,
-mysqli, pdo_mysql, opcache, soap, zip and more), composer, msmtp and the admin tools of ns8-lamp
-(vim, nano, git, wget, curl, zip, ftp, mariadb client).
+The PHP image loads the same extensions as ns8-lamp (gd, intl, ldap, imagick, imap, apcu, memcached,
+mysqli, pdo_mysql, opcache, soap, sockets, xsl, zip and more). The build fails if one is missing.
+It also has composer, msmtp and the admin tools of ns8-lamp (vim, nano, git, wget, curl, zip, ftp,
+mariadb client).
 
 ## Install
 
