@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Remove the PHP-FPM images of the other PHP versions and of previous module
+# releases. Run it after the restart: podman keeps an image still in use.
+
+import os
+import sys
+import subprocess
+
+repository = os.environ["IMAGE_URL"].rsplit(":", 1)[0]
+listing = subprocess.run(["podman", "images", "--format", "{{.Repository}}:{{.Tag}}"],
+                         stdout=subprocess.PIPE, text=True, check=True).stdout.split()
+for image in listing:
+    if image.startswith(f"{repository}-php") and image != os.environ["PHP_IMAGE"]:
+        subprocess.run(["podman", "rmi", image], stdout=sys.stderr, stderr=sys.stderr)

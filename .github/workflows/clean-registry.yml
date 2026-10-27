@@ -15,5 +15,5 @@ jobs:
     steps:
       - uses: NethServer/ns8-github-actions/.github/actions/delete-image@v1
         with:
-          images: "kickstart"
+          images: "lemp lemp-php8.2 lemp-php8.3 lemp-php8.4 lemp-php8.5"
           delete_image_token: ${{ secrets.IMAGES_CLEANUP_TOKEN }}

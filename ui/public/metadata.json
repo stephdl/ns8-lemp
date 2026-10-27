@@ -1,19 +1,29 @@
 {
-  "name": "kickstart",
+  "name": "LEMP",
+  "upstream_name": "version set automatically",
   "description": {
-    "en": "My kickstart module"
+    "en": "Host a PHP web site with nginx, PHP-FPM 8.2 to 8.5, MariaDB and phpMyAdmin, with mail through the cluster smarthost.",
+    "fr": "Hébergez un site web PHP avec nginx, PHP-FPM 8.2 à 8.5, MariaDB et phpMyAdmin, avec l'envoi de mails par le smarthost du cluster.",
+    "it": "Ospita un sito web PHP con nginx, PHP-FPM da 8.2 a 8.5, MariaDB e phpMyAdmin, con invio di posta tramite lo smarthost del cluster.",
+    "de": "Betreiben Sie eine PHP-Website mit nginx, PHP-FPM 8.2 bis 8.5, MariaDB und phpMyAdmin, mit Mailversand über den Smarthost des Clusters.",
+    "es": "Aloje un sitio web PHP con nginx, PHP-FPM 8.2 a 8.5, MariaDB y phpMyAdmin, con envío de correo a través del smarthost del clúster.",
+    "pt": "Aloje um site web PHP com nginx, PHP-FPM 8.2 a 8.5, MariaDB e phpMyAdmin, com envio de correio através do smarthost do cluster.",
+    "pt_BR": "Hospede um site PHP com nginx, PHP-FPM 8.2 a 8.5, MariaDB e phpMyAdmin, com envio de e-mail pelo smarthost do cluster.",
+    "eu": "Ostatatu PHP webgune bat nginx, PHP-FPM 8.2tik 8.5era, MariaDB eta phpMyAdmin-ekin, klusterraren smarthost bidezko posta-bidalketarekin.",
+    "nl": "Host een PHP-website met nginx, PHP-FPM 8.2 tot 8.5, MariaDB en phpMyAdmin, met e-mail via de smarthost van het cluster.",
+    "ar": "استضف موقع PHP مع nginx و PHP-FPM من 8.2 إلى 8.5 و MariaDB و phpMyAdmin، مع إرسال البريد عبر المضيف الذكي للعنقود."
   },
-  "categories": [],
+  "categories": ["web", "development"],
   "authors": [
     {
-      "name": "Name Surname",
-      "email": "author@yourmail.org"
+      "name": "Stephane de Labrusse",
+      "email": "stephdl@de-labrusse.fr"
     }
   ],
   "docs": {
-    "documentation_url": "https://docs.kickstart.com/",
-    "bug_url": "https://github.com/NethServer/dev",
-    "code_url": "https://github.com/author/ns8-kickstart"
+    "documentation_url": "https://github.com/stephdl/ns8-lemp#readme",
+    "bug_url": "https://github.com/stephdl/ns8-lemp/issues",
+    "code_url": "https://github.com/stephdl/ns8-lemp"
   },
-  "source": "ghcr.io/nethserver/kickstart"
+  "source": "ghcr.io/stephdl/lemp"
 }

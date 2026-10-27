@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Give the site the bind credentials of the selected user domain, like ns8-lamp
+
+import os
+import agent
+from agent.ldapproxy import Ldapproxy
+
+domain = os.environ.get("USER_DOMAIN", "")
+lines = []
+if domain:
+    odom = None
+    try:
+        odom = Ldapproxy().get_domain(domain)
+    except Exception as ex:
+        print(agent.SD_WARNING + f"Cannot read user domain {domain}: {ex}", flush=True)
+    if odom:
+        # ldapproxy listens on the node loopback, which the pod reaches as 10.0.2.2
+        host = "10.0.2.2" if odom["host"] in ("127.0.0.1", "localhost") else odom["host"]
+        lines = [
+            f"LEMP_LDAP_HOST={host}",
+            f"LEMP_LDAP_PORT={odom['port']}",
+            f"LEMP_LDAP_SCHEMA={odom['schema']}",
+            f"LEMP_LDAP_BASE={odom['base_dn']}",
+            f"LEMP_LDAP_USER={odom['bind_dn']}",
+            f"LEMP_LDAP_PASS={odom['bind_password']}",
+        ]
+
+# The file holds the bind password: create it private before writing
+tmpfile = f"discovery.env.{os.getpid()}"
+fd = os.open(tmpfile, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+with os.fdopen(fd, "w") as fp:
+    fp.write("".join(line + "\n" for line in lines))
+os.replace(tmpfile, "discovery.env")

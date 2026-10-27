@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Create the site database and users, and apply their passwords. Idempotent.
+# The SQL goes through stdin: passwords never appear on a command line.
+
+import os
+import sys
+import subprocess
+import agent
+
+
+def read_env_file(path):
+    values = {}
+    with open(path) as fp:
+        for line in fp:
+            key, sep, value = line.rstrip("\n").partition("=")
+            if sep:
+                values[key] = value
+    return values
+
+
+def quote(value):
+    return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'"
+
+
+db_name = os.environ["DB_NAME"]
+db_user = os.environ["DB_USER"]
+db_password = read_env_file("secrets/db.env").get("LEMP_DB_PASSWORD", "")
+admin_password = read_env_file("secrets/admin.env").get("MARIADB_ADMIN_PASSWORD", "")
+
+# In a database grant _ is a wildcard: my_site would also match my1site
+grant_db = db_name.replace("_", "\\_")
+
+sql = [f"CREATE DATABASE IF NOT EXISTS `{db_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"]
+# An account is created only with its password, never open without one
+if db_password:
+    sql += [
+        f"CREATE USER IF NOT EXISTS {quote(db_user)}@'%' IDENTIFIED BY {quote(db_password)};",
+        f"ALTER USER {quote(db_user)}@'%' IDENTIFIED BY {quote(db_password)};",
+        f"GRANT ALL PRIVILEGES ON `{grant_db}`.* TO {quote(db_user)}@'%';",
+    ]
+if admin_password:
+    sql += [
+        f"CREATE USER IF NOT EXISTS 'admin'@'%' IDENTIFIED BY {quote(admin_password)};",
+        f"ALTER USER 'admin'@'%' IDENTIFIED BY {quote(admin_password)};",
+        "GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%' WITH GRANT OPTION;",
+    ]
+
+proc = subprocess.run(
+    ["podman", "exec", "-i", "mariadb-app", "sh", "-c", 'MYSQL_PWD="$MARIADB_ROOT_PASSWORD" exec mariadb -uroot'],
+    input="\n".join(sql) + "\n", text=True,
+)
+if proc.returncode != 0:
+    print(agent.SD_ERR + "Cannot apply the MariaDB database and accounts", file=sys.stderr)
+    sys.exit(1)
+
+# The flags tell the UI and the validation that the password is really in MariaDB
+if db_password:
+    agent.set_env("DB_PASSWORD_SET", "True")
+if admin_password:
+    agent.set_env("ADMIN_PASSWORD_SET", "True")

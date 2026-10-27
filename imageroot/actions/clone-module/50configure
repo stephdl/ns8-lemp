@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import os
+import sys
+import json
+import agent
+import lemp
+from agent.ldapproxy import Ldapproxy
+
+request = json.load(sys.stdin)
+
+user_domain = os.environ.get("USER_DOMAIN", "")
+if user_domain and user_domain not in Ldapproxy().get_domains_list():
+    print(agent.SD_WARNING + f"User domain {user_domain} not found, its LDAP credentials are no longer given to PHP", file=sys.stderr)
+    agent.set_env("USER_DOMAIN", "")
+    user_domain = ""
+
+# A plain clone keeps running next to its source: the admin must give it a new host name
+if not request.get("replace"):
+    agent.unset_env("ROUTE_HOST")
+    if user_domain:
+        agent.bind_user_domains([user_domain])
+    print(agent.SD_WARNING + "Cloned instance has no web route, set a new host name in Settings", file=sys.stderr)
+    sys.exit(0)
+
+data = lemp.request_from_env(os.environ)
+data["user_domain"] = user_domain
+configure_retval = agent.tasks.run(agent_id=os.environ["AGENT_ID"], action="configure-module", data=data)
+agent.assert_exp(configure_retval["exit_code"] == 0, "The configure-module subtask failed!")

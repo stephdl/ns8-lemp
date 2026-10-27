@@ -1,37 +1,31 @@
 #!/usr/bin/env python3
 
 #
-# Copyright (C) 2022 Nethesis S.r.l.
+# Copyright (C) 2026 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-import json
+import os
 import sys
+import json
 import agent
+import lemp
 
-# Try to parse the stdin as JSON.
-# If parsing fails, output everything to stderr
 data = json.load(sys.stdin)
-host = data["host"]
-h2hs = data.get("http2https", True)
-agent.set_env("TRAEFIK_HOST", host)
-agent.set_env("TRAEFIK_HTTP2HTTPS", h2hs)
 
-#This is specific to you module, so you need to change it accordingly.
-# we read a json stdin {"vars1":true, "var2":"foo", "vars3": 3} and we writ it to .config/state/environment
-# Upper case to set environment variable and minor case to read from stdin
-
-# this values must exists in the json stdin
-# agent.set_env("MAIL_SERVER", data["mail_server"])
-# agent.set_env("LDAP_DOMAIN", data["ldap_domain"])
-
-# you can add default values for the following variables
-# agent.set_env("MAIL_DOMAIN",data.get("mail_domain",""))
-# agent.set_env("WOWORKERSCOUNT",data.get("workers_count",3))
-# agent.set_env("AUXILIARYACCOUNT",data.get("auxiliary_account",True))
-# agent.set_env("ACTIVESYNC",data.get("activesync",False))
+for var, value in lemp.env_from_request(data).items():
+    agent.set_env(var, value)
 
 
-# Make sure everything is saved inside the environment file
-# just before starting systemd unit
-#agent.dump_env()
+def write_secret(path, key, value):
+    fd = os.open(path + ".tmp", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as fp:
+        fp.write(f"{key}={value}\n")
+    os.replace(path + ".tmp", path)
+
+
+# Written before MariaDB applies them: a failed run retries with the same value
+if data.get("db_password"):
+    write_secret("secrets/db.env", "LEMP_DB_PASSWORD", data["db_password"])
+if data.get("admin_password"):
+    write_secret("secrets/admin.env", "MARIADB_ADMIN_PASSWORD", data["admin_password"])

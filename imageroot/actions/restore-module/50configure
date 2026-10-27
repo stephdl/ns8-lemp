@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import os
+import sys
+import json
+import agent
+import lemp
+from agent.ldapproxy import Ldapproxy
+
+request = json.load(sys.stdin)
+renv = request["environment"]
+
+user_domain = renv.get("USER_DOMAIN", "")
+if user_domain and user_domain not in Ldapproxy().get_domains_list():
+    print(agent.SD_WARNING + f"User domain {user_domain} not found, its LDAP credentials are no longer given to PHP", file=sys.stderr)
+    user_domain = ""
+
+# Passwords are omitted: the restored secrets and flags keep them
+data = lemp.request_from_env(renv)
+data["user_domain"] = user_domain
+configure_retval = agent.tasks.run(agent_id=os.environ["AGENT_ID"], action="configure-module", data=data)
+agent.assert_exp(configure_retval["exit_code"] == 0, "The configure-module subtask failed!")

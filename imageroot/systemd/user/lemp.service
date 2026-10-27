@@ -1,0 +1,40 @@
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+#
+# This systemd unit starts a lemp instance using Podman.
+# Most parts of this file come from podman-generate-systemd.
+#
+
+[Unit]
+Description=Podman lemp.service
+Requires=mariadb-app.service php-fpm-app.service nginx-app.service cron-app.service
+Wants=phpmyadmin-app.service
+Before=mariadb-app.service php-fpm-app.service nginx-app.service cron-app.service phpmyadmin-app.service
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=-%S/state/environment
+Restart=always
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/lemp.pid %t/lemp.pod-id
+# The site host name points to Traefik on the node, so the site can call itself (WordPress cron, Site Health)
+ExecStartPre=/usr/bin/podman pod create --infra-conmon-pidfile %t/lemp.pid \
+    --pod-id-file %t/lemp.pod-id \
+    --name lemp \
+    --hostname ${TRAEFIK_HOST} \
+    --publish 127.0.0.1:${TCP_PORT}:8080 \
+    --network=slirp4netns:allow_host_loopback=true \
+    --add-host=accountprovider:10.0.2.2 \
+    --add-host=${TRAEFIK_HOST}:10.0.2.2 \
+    --replace
+ExecStart=/usr/bin/podman pod start --pod-id-file %t/lemp.pod-id
+ExecStop=/usr/bin/podman pod stop --ignore --pod-id-file %t/lemp.pod-id -t 10
+ExecStopPost=/usr/bin/podman pod rm --ignore -f --pod-id-file %t/lemp.pod-id
+PIDFile=%t/lemp.pid
+Type=forking
+
+[Install]
+WantedBy=default.target

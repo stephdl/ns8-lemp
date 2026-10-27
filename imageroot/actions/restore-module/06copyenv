@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
 
 #
-# Copyright (C) 2022 Nethesis S.r.l.
+# Copyright (C) 2026 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
 import sys
 import json
 import agent
+import lemp
 
 request = json.load(sys.stdin)
 
-original_environment = request['environment']
+original_environment = request["environment"]
 
-for evar in [
-        "TRAEFIK_HOST",
-        "TRAEFIK_HTTP2HTTPS",
-    ]:
-    agent.set_env(evar, original_environment[evar])
-
-agent.dump_env()
+for evar in lemp.ENV_VARS + ["DB_PASSWORD_SET", "ADMIN_PASSWORD_SET"]:
+    if evar in original_environment:
+        agent.set_env(evar, original_environment[evar])

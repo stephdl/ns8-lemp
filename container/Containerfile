@@ -1,0 +1,89 @@
+# Images are passed by build-images.sh, where Renovate tracks their tags
+ARG PHP_IMAGE
+ARG COMPOSER_IMAGE
+ARG EXTENSION_INSTALLER_IMAGE
+
+FROM ${COMPOSER_IMAGE} AS composer
+FROM ${EXTENSION_INSTALLER_IMAGE} AS extension-installer
+
+FROM ${PHP_IMAGE}
+
+LABEL org.opencontainers.image.authors="Stephane de Labrusse <stephdl@de-labrusse.fr>"
+LABEL org.opencontainers.image.source="https://github.com/stephdl/ns8-lemp"
+
+COPY --from=extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+COPY --from=composer /usr/bin/composer /usr/local/bin/composer
+
+# Same extension set as ns8-lamp, so applications move from one to the other
+RUN install-php-extensions \
+        apcu \
+        bcmath \
+        bz2 \
+        exif \
+        ftp \
+        gd \
+        gettext \
+        gmp \
+        imagick \
+        imap \
+        intl \
+        ldap \
+        memcached \
+        mysqli \
+        odbc \
+        opcache \
+        pdo_mysql \
+        pdo_odbc \
+        soap \
+        tidy \
+        zip && \
+    rm /usr/local/bin/install-php-extensions
+
+# Admin tools of ns8-lamp. msmtp replaces ssmtp, which is no longer maintained
+RUN apt-get update && \
+    apt-get -y install --no-install-recommends \
+        cron \
+        curl \
+        ftp-ssl \
+        git \
+        mariadb-client \
+        msmtp \
+        nano \
+        pwgen \
+        tree \
+        unzip \
+        vim \
+        wget \
+        zip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Cron jobs run with PATH=/usr/bin:/bin and must find php and composer
+RUN ln -s /usr/local/bin/php /usr/bin/php && \
+    ln -s /usr/local/bin/composer /usr/bin/composer
+
+# Fail the build if an extension is not loaded or misses a shared library
+RUN missing=0; \
+    for ext in apcu bcmath bz2 exif ftp gd gettext gmp imagick imap intl ldap memcached \
+               mysqli odbc pdo_mysql pdo_odbc soap tidy zip; do \
+        php -m | grep -qix "${ext}" || { echo "Missing PHP extension: ${ext}" >&2; missing=1; }; \
+    done; \
+    php -v | grep -q "with Zend OPcache" || { echo "Missing PHP extension: opcache" >&2; missing=1; }; \
+    if ldd "$(php -r 'echo ini_get("extension_dir");')"/*.so | grep -q "not found"; then \
+        echo "Missing shared library for a PHP extension" >&2; missing=1; \
+    fi; \
+    exit "${missing}"
+
+# Production defaults, the module settings are added in conf.d
+# The module mounts its generated and custom files in /etc/lemp, loaded last
+ENV PHP_INI_SCAN_DIR=/usr/local/etc/php/conf.d:/etc/lemp/php.d
+RUN cp "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini" && \
+    echo "include=/etc/lemp/fpm.d/*.conf" >> /usr/local/etc/php-fpm.conf && \
+    mkdir -p /etc/lemp/php.d /etc/lemp/fpm.d
+
+COPY --chmod=0755 lemp-entrypoint lemp-cron-shell /usr/local/bin/
+COPY index.php /usr/local/share/lemp/
+
+WORKDIR /app
+ENTRYPOINT ["/usr/local/bin/lemp-entrypoint"]
+CMD ["php-fpm"]

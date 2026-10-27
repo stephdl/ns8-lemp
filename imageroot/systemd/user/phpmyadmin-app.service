@@ -1,0 +1,37 @@
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+[Unit]
+Description=Podman phpmyadmin-app.service
+BindsTo=lemp.service
+After=lemp.service mariadb-app.service
+Before=nginx-app.service
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=%S/state/environment
+Restart=always
+TimeoutStopSec=70
+# The pod always wants this unit: it runs only when phpMyAdmin is enabled
+ExecCondition=/usr/bin/test "${PHPMYADMIN_ENABLED}" = "True"
+ExecStartPre=/bin/rm -f %t/phpmyadmin-app.pid %t/phpmyadmin-app.ctr-id
+ExecStart=/usr/bin/podman run --conmon-pidfile %t/phpmyadmin-app.pid \
+    --cidfile %t/phpmyadmin-app.ctr-id --cgroups=no-conmon \
+    --pod-id-file %t/lemp.pod-id --replace -d --name phpmyadmin-app \
+    --volume %S/state/phpmyadmin/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf:ro,Z \
+    --env PMA_HOST=127.0.0.1 \
+    --env PMA_PORT=3306 \
+    --env PMA_ABSOLUTE_URI=https://${TRAEFIK_HOST}/phpmyadmin/ \
+    --env UPLOAD_LIMIT=${PHP_UPLOAD_MAX_FILESIZE} \
+    --env HIDE_PHP_VERSION=1 \
+    ${PHPMYADMIN_IMAGE}
+ExecStop=/usr/bin/podman stop --ignore --cidfile %t/phpmyadmin-app.ctr-id -t 10
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/phpmyadmin-app.ctr-id
+SyslogIdentifier=%u
+PIDFile=%t/phpmyadmin-app.pid
+Type=forking
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,41 @@
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+[Unit]
+Description=Podman cron-app.service
+BindsTo=lemp.service
+After=lemp.service php-fpm-app.service
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=%S/state/environment
+Restart=always
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/cron-app.pid %t/cron-app.ctr-id
+ExecStartPre=/usr/bin/touch %S/state/smarthost.env %S/state/discovery.env
+ExecStart=/usr/bin/podman run --conmon-pidfile %t/cron-app.pid \
+    --cidfile %t/cron-app.ctr-id --cgroups=no-conmon \
+    --pod-id-file %t/lemp.pod-id --replace -d --name cron-app \
+    --volume app:/app:z \
+    --volume %S/state/php/php.d:/etc/lemp/php.d:ro,z \
+    --volume %S/state/crontab:/etc/lemp/crontab:ro,Z \
+    --env-file=%S/state/smarthost.env \
+    --env-file=%S/state/discovery.env \
+    --env-file=%S/state/secrets/db.env \
+    --env NS8_HOSTNAME=${TRAEFIK_HOST} \
+    --env MAIL_FROM=${MAIL_FROM} \
+    --env LEMP_DB_HOST=127.0.0.1 \
+    --env LEMP_DB_PORT=3306 \
+    --env LEMP_DB_NAME=${DB_NAME} \
+    --env LEMP_DB_USER=${DB_USER} \
+    ${PHP_IMAGE} cron -f
+ExecStop=/usr/bin/podman stop --ignore --cidfile %t/cron-app.ctr-id -t 10
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/cron-app.ctr-id
+SyslogIdentifier=%u
+PIDFile=%t/cron-app.pid
+Type=forking
+
+[Install]
+WantedBy=default.target

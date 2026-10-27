@@ -1,6 +1,45 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "local>NethServer/.github:ns8-automerge"
-  ]
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "local>NethServer/.github:ns8-automerge"
+    ],
+    "packageRules": [
+        {
+            "description": "Stay on the MariaDB 12.3 LTS branch, a major upgrade needs a dump and restore",
+            "matchDepNames": ["mariadb"],
+            "allowedVersions": "/^12\\.3\\./"
+        },
+        {
+            "description": "Stay on the nginx 1.30 stable branch, odd minors are the mainline",
+            "matchDepNames": ["nginx"],
+            "allowedVersions": "/^1\\.30\\./"
+        },
+        {
+            "description": "Each PHP image follows its own branch: a new PHP minor is added by hand",
+            "matchDepNames": ["php"],
+            "matchCurrentValue": "/^8\\.2\\./",
+            "allowedVersions": "/^8\\.2\\.\\d+-fpm-trixie$/"
+        },
+        {
+            "matchDepNames": ["php"],
+            "matchCurrentValue": "/^8\\.3\\./",
+            "allowedVersions": "/^8\\.3\\.\\d+-fpm-trixie$/"
+        },
+        {
+            "matchDepNames": ["php"],
+            "matchCurrentValue": "/^8\\.4\\./",
+            "allowedVersions": "/^8\\.4\\.\\d+-fpm-trixie$/"
+        },
+        {
+            "matchDepNames": ["php"],
+            "matchCurrentValue": "/^8\\.5\\./",
+            "allowedVersions": "/^8\\.5\\.\\d+-fpm-trixie$/"
+        },
+        {
+            "description": "A phpMyAdmin major can drop support for the MariaDB version: review it by hand",
+            "matchDepNames": ["phpmyadmin"],
+            "matchUpdateTypes": ["major"],
+            "automerge": false
+        }
+    ]
 }

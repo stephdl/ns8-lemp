@@ -18,8 +18,9 @@ envfile = "smarthost.env"
 
 # Using .tmp suffix: do not overwrite the target file until the new one is
 # saved to disk:
-with open(envfile + ".tmp", "w") as efp:
-    # HINT for kickstart: adjust variable names as needed
+# The file holds the smarthost password: create it private before writing
+fd = os.open(envfile + ".tmp", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+with os.fdopen(fd, "w") as efp:
     print(f"SMTP_ENABLED={'1' if smtp_settings['enabled'] else ''}", file=efp)
     print(f"SMTP_HOST={smtp_settings['host']}", file=efp)
     print(f"SMTP_PORT={smtp_settings['port']}", file=efp)
@@ -30,7 +31,3 @@ with open(envfile + ".tmp", "w") as efp:
 
 # Commit changes by replacing the existing envfile:
 os.replace(envfile + ".tmp", envfile)
-
-# NOTE: The generated envfile can be included in the service container
-#       with `podman run --env-file` or in Systemd unit with
-#       `Environment=-%S/state/smarthost.env`

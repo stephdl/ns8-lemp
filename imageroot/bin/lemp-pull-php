@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Pull the PHP-FPM image of the selected PHP version
+
+import os
+import agent
+import lemp
+
+php_image = lemp.php_image(os.environ["IMAGE_URL"], os.environ["PHP_VERSION"])
+agent.run_helper("podman-pull-missing", php_image).check_returncode()
+agent.set_env("PHP_IMAGE", php_image)

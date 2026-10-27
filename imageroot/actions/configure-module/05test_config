@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Test the new nginx, PHP and MariaDB files before any setting is saved:
+# a refused configuration leaves the module and the running site as they were
+
+import os
+import sys
+import json
+import subprocess
+import agent
+import lemp
+
+data = json.load(sys.stdin)
+
+php_image = lemp.php_image(os.environ["IMAGE_URL"], data["php_version"])
+agent.run_helper("podman-pull-missing", php_image).check_returncode()
+
+env = dict(os.environ, **lemp.env_from_request(data), PHP_IMAGE=php_image)
+render = os.path.join(os.environ["AGENT_INSTALL_DIR"], "bin", "lemp-render-config")
+sys.exit(subprocess.run([render, "--check"], env=env, stdout=sys.stderr).returncode)
