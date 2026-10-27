@@ -9,26 +9,12 @@ import os
 import sys
 import json
 import agent
+import lemp
 
 data = json.load(sys.stdin)
 
-agent.set_env("TRAEFIK_HOST", data["host"])
-agent.set_env("TRAEFIK_LETS_ENCRYPT", data["lets_encrypt"])
-agent.set_env("PHP_VERSION", data["php_version"])
-agent.set_env("DOCUMENT_ROOT", data["document_root"].strip("/"))
-agent.set_env("NGINX_PRESET", data["nginx_preset"])
-agent.set_env("PHP_MEMORY_LIMIT", data["php_memory_limit"])
-agent.set_env("PHP_UPLOAD_MAX_FILESIZE", data["php_upload_max_filesize"])
-agent.set_env("PHP_MAX_EXECUTION_TIME", data["php_max_execution_time"])
-agent.set_env("PHP_TIMEZONE", data["php_timezone"])
-agent.set_env("FPM_PM_MAX_CHILDREN", data["fpm_pm_max_children"])
-agent.set_env("MARIADB_INNODB_BUFFER_POOL_SIZE", data["mariadb_innodb_buffer_pool_size"])
-agent.set_env("PHPMYADMIN_ENABLED", data["phpmyadmin_enabled"])
-agent.set_env("DB_NAME", data["db_name"])
-agent.set_env("DB_USER", data["db_user"])
-agent.set_env("USER_DOMAIN", data["user_domain"])
-# Empty keeps the sender on the current host name, see lemp-entrypoint
-agent.set_env("MAIL_FROM", data["mail_from"])
+for var, value in lemp.env_from_request(data).items():
+    agent.set_env(var, value)
 
 
 def write_secret(path, key, value):

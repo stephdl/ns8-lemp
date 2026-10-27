@@ -8,30 +8,12 @@
 import sys
 import json
 import agent
+import lemp
 
 request = json.load(sys.stdin)
 
 original_environment = request["environment"]
 
-for evar in [
-        "TRAEFIK_HOST",
-        "TRAEFIK_LETS_ENCRYPT",
-        "PHP_VERSION",
-        "DOCUMENT_ROOT",
-        "NGINX_PRESET",
-        "PHP_MEMORY_LIMIT",
-        "PHP_UPLOAD_MAX_FILESIZE",
-        "PHP_MAX_EXECUTION_TIME",
-        "PHP_TIMEZONE",
-        "FPM_PM_MAX_CHILDREN",
-        "MARIADB_INNODB_BUFFER_POOL_SIZE",
-        "PHPMYADMIN_ENABLED",
-        "DB_NAME",
-        "DB_USER",
-        "DB_PASSWORD_SET",
-        "ADMIN_PASSWORD_SET",
-        "USER_DOMAIN",
-        "MAIL_FROM",
-    ]:
+for evar in lemp.ENV_VARS + ["DB_PASSWORD_SET", "ADMIN_PASSWORD_SET"]:
     if evar in original_environment:
         agent.set_env(evar, original_environment[evar])

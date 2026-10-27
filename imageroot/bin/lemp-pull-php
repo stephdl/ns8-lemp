@@ -5,16 +5,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-# Pull the PHP-FPM image of the selected PHP version. It has the same
-# registry and tag as the module image, e.g. ghcr.io/nethserver/lemp-php8.4:1.0.0
+# Pull the PHP-FPM image of the selected PHP version
 
 import os
 import agent
+import lemp
 
-image_url = os.environ["IMAGE_URL"]
-repository, tag = image_url.rsplit(":", 1)
-php_repository = f"{repository}-php{os.environ['PHP_VERSION']}"
-php_image = f"{php_repository}:{tag}"
-
+php_image = lemp.php_image(os.environ["IMAGE_URL"], os.environ["PHP_VERSION"])
 agent.run_helper("podman-pull-missing", php_image).check_returncode()
 agent.set_env("PHP_IMAGE", php_image)

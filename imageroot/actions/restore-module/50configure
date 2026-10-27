@@ -9,6 +9,7 @@ import os
 import sys
 import json
 import agent
+import lemp
 from agent.ldapproxy import Ldapproxy
 
 request = json.load(sys.stdin)
@@ -20,22 +21,7 @@ if user_domain and user_domain not in Ldapproxy().get_domains_list():
     user_domain = ""
 
 # Passwords are omitted: the restored secrets and flags keep them
-configure_retval = agent.tasks.run(agent_id=os.environ["AGENT_ID"], action="configure-module", data={
-    "host": renv["TRAEFIK_HOST"],
-    "lets_encrypt": renv.get("TRAEFIK_LETS_ENCRYPT") == "True",
-    "php_version": renv.get("PHP_VERSION", "8.4"),
-    "document_root": renv.get("DOCUMENT_ROOT", ""),
-    "nginx_preset": renv.get("NGINX_PRESET", "generic"),
-    "php_memory_limit": renv.get("PHP_MEMORY_LIMIT", "512M"),
-    "php_upload_max_filesize": renv.get("PHP_UPLOAD_MAX_FILESIZE", "100M"),
-    "php_max_execution_time": int(renv.get("PHP_MAX_EXECUTION_TIME", "600")),
-    "php_timezone": renv.get("PHP_TIMEZONE", "UTC"),
-    "fpm_pm_max_children": int(renv.get("FPM_PM_MAX_CHILDREN", "10")),
-    "mariadb_innodb_buffer_pool_size": renv.get("MARIADB_INNODB_BUFFER_POOL_SIZE", "256M"),
-    "phpmyadmin_enabled": renv.get("PHPMYADMIN_ENABLED", "True") == "True",
-    "db_name": renv.get("DB_NAME", "app"),
-    "db_user": renv.get("DB_USER", "app"),
-    "user_domain": user_domain,
-    "mail_from": renv.get("MAIL_FROM", ""),
-})
+data = lemp.request_from_env(renv)
+data["user_domain"] = user_domain
+configure_retval = agent.tasks.run(agent_id=os.environ["AGENT_ID"], action="configure-module", data=data)
 agent.assert_exp(configure_retval["exit_code"] == 0, "The configure-module subtask failed!")
