@@ -83,25 +83,35 @@ The module scripts use it for the dumps and the account changes.
 
 ## Customize
 
-Each service has custom files in the module state directory. The module creates them once and never overwrites them.
-They are loaded after the module settings, so they win.
+Each service has custom files in the module state directory. The module creates them once, with a commented
+example, and never overwrites them. They are loaded after the module settings, so they win.
+The backup, the restore and the clone keep them.
 
-| File | Service |
-|---|---|
-| `nginx/custom.d/*.conf` | nginx directives, included in the `server` block |
-| `php/php.d/90-custom.ini` | PHP settings |
-| `php/fpm.d/90-custom.conf` | PHP-FPM pool, start the file with `[www]` |
-| `mariadb/90-custom.cnf` | MariaDB settings, start the file with `[mysqld]` |
-| `crontab` | cron jobs, in `/etc/cron.d` format with a user field |
+| File | Service | Example |
+|---|---|---|
+| `nginx/custom.d/*.conf` | nginx, included in the `server` block | `location /private/ { deny all; }` |
+| `php/php.d/90-custom.ini` | PHP | `max_input_vars = 5000` |
+| `php/fpm.d/90-custom.conf` | PHP-FPM pool, start the file with `[www]` | `pm.max_requests = 500` |
+| `mariadb/90-custom.cnf` | MariaDB server, start the file with `[mysqld]` | `max_connections = 300` |
+| `crontab` | cron jobs, see [Cron](#cron) | `*/5 * * * * www-data php /app/cron.php` |
 
-Edit them from the module environment:
+nginx ignores `.htaccess` files. Put the rewrite rules of an application in `nginx/custom.d/`.
+
+Edit the files from the module environment:
 
     runagent -m lemp1
-    vi nginx/custom.d/90-custom.conf
+    vi php/php.d/90-custom.ini
 
 Then save the Settings page, or run `configure-module` again. The module tests nginx, PHP-FPM, PHP and MariaDB
 with the new files before the restart. A broken file stops the action with the error in the task log,
 and the running site keeps its current configuration.
+
+Check the applied values:
+
+    runagent -m lemp1 podman exec nginx-app nginx -T
+    runagent -m lemp1 podman exec php-fpm-app php -i
+    runagent -m lemp1 podman exec php-fpm-app php-fpm -tt
+    runagent -m lemp1 podman exec mariadb-app mariadbd --print-defaults
 
 ## Cron
 
