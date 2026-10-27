@@ -121,8 +121,9 @@ Download it with git, wget, curl, ftp or composer, then give the files to `www-d
     git clone https://example.org/my/site.git .
     chown -R www-data:www-data /app
 
-A fresh instance has an `index.php` page. Delete it once the site is installed.
-There is no `phpinfo.php` page: `phpinfo()` shows the database password that PHP-FPM gives to the site.
+A fresh instance has an `index.php` page and a `phpinfo.php` page. Delete them once the site is installed.
+`phpinfo.php` leaves out the Environment and Variables sections: they would show the database password
+that PHP-FPM gives to the site. Never call `phpinfo()` without arguments on a public page.
 
 ### WordPress example
 
@@ -131,7 +132,7 @@ Set `nginx_preset` to `wordpress` in the Advanced section of the Settings page, 
 Download WordPress into the `app` volume, as `www-data`:
 
     runagent -m lemp1 podman exec -ti -u www-data -w /app php-fpm-app bash
-    rm -f index.php
+    rm -f index.php phpinfo.php
     curl -sL https://wordpress.org/latest.tar.gz | tar xz --strip-components=1
 
 Create `wp-config.php` from the module variables with [WP-CLI](https://wp-cli.org/), in the same shell:
