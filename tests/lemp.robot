@@ -107,7 +107,8 @@ Check the database accounts
     Should Contain    ${output}    app
     ${output}    ${rc} =    SQL as    admin    ${MARIADB_ADMIN}    SHOW GRANTS;
     Should Be Equal As Integers    ${rc}    0
-    Should Contain    ${output}    ALL PRIVILEGES ON *.* TO `admin`@`%` WITH GRANT OPTION
+    Should Contain    ${output}    GRANT ALL PRIVILEGES ON *.* TO `admin`@`%`
+    Should Contain    ${output}    WITH GRANT OPTION
     # root is reachable only from inside the MariaDB container
     ${output}    ${rc} =    SQL as    root    ${EMPTY}    SELECT 1;
     Should Not Be Equal As Integers    ${rc}    0
@@ -169,7 +170,9 @@ Check a custom file is kept and applied
     Should Contain    ${custom}    max_input_vars = 4321
 
 Check the cron jobs run
-    In the module    sh -c 'echo "* * * * * www-data php -r \\"file_put_contents(\\x27/app/cron.txt\\x27, getenv(\\x27LEMP_DB_NAME\\x27));\\"" >> crontab'
+    # A script file keeps the crontab line free of nested quotes
+    In the module    podman exec php-fpm-app sh -c 'echo "<?php file_put_contents(\\"/app/cron.txt\\", getenv(\\"LEMP_DB_NAME\\"));" > /app/cronjob.php'
+    In the module    sh -c 'echo "* * * * * www-data php /app/cronjob.php" >> crontab'
     In the module    systemctl --user restart cron-app.service
     Wait Until Keyword Succeeds    150 seconds    10 seconds    In the module    podman exec php-fpm-app test -f /app/cron.txt
     ${output} =    In the module    podman exec php-fpm-app cat /app/cron.txt
