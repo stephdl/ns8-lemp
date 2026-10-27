@@ -33,7 +33,8 @@
     "search_volumes": "Bilatu bolumenak",
     "website": "Webgunea",
     "stack": "Software pila",
-    "open_phpmyadmin": "Ireki phpMyAdmin"
+    "open_phpmyadmin": "Ireki phpMyAdmin",
+    "phpmyadmin_disabled": "Desgaituta"
   },
   "about": {
     "title": "Honi buruz"

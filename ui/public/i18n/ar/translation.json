@@ -33,7 +33,8 @@
     "search_volumes": "البحث في وحدات التخزين",
     "website": "الموقع",
     "stack": "المكونات",
-    "open_phpmyadmin": "فتح phpMyAdmin"
+    "open_phpmyadmin": "فتح phpMyAdmin",
+    "phpmyadmin_disabled": "معطل"
   },
   "about": {
     "title": "حول"

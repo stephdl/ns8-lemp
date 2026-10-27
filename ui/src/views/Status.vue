@@ -85,14 +85,13 @@
           <!-- stack -->
           <NsInfoCard
             light
-            :title="versions.php ? 'PHP ' + versions.php : '-'"
-            :description="$t('status.stack')"
+            :title="$t('status.stack')"
             :icon="DataBase32"
             :loading="loading.getConfiguration"
             class="min-height-card"
           >
             <template slot="content">
-              <div class="card-rows">
+              <div class="card-rows stack-row">
                 <div v-if="loading.getConfiguration" class="card-row">
                   <cv-skeleton-text
                     :paragraph="true"
@@ -100,7 +99,7 @@
                     class="stack-table"
                   ></cv-skeleton-text>
                 </div>
-                <div v-else class="card-row">
+                <div v-else class="card-row stack-row">
                   <table class="stack-table">
                     <tr v-for="item in stackRows" :key="item.name">
                       <td class="stack-label">{{ item.name }}</td>
@@ -108,6 +107,24 @@
                     </tr>
                   </table>
                 </div>
+              </div>
+            </template>
+          </NsInfoCard>
+          <!-- phpMyAdmin -->
+          <NsInfoCard
+            light
+            title="phpMyAdmin"
+            :description="
+              phpmyadminEnabled
+                ? versions.phpmyadmin || '-'
+                : $t('status.phpmyadmin_disabled')
+            "
+            :icon="Tools32"
+            :loading="loading.getConfiguration"
+            class="min-height-card"
+          >
+            <template slot="content">
+              <div class="card-rows">
                 <div class="card-row">
                   <NsButton
                     v-if="host && phpmyadminEnabled"
@@ -117,6 +134,15 @@
                     @click="goToPhpmyadmin"
                   >
                     {{ $t("status.open_phpmyadmin") }}
+                  </NsButton>
+                  <NsButton
+                    v-else
+                    kind="ghost"
+                    :icon="ArrowRight20"
+                    :disabled="loading.getConfiguration"
+                    @click="goToAppPage(instanceName, 'settings')"
+                  >
+                    {{ $t("status.configure") }}
                   </NsButton>
                 </div>
               </div>
@@ -478,8 +504,8 @@ export default {
     stackRows() {
       return [
         { name: "nginx", version: this.versions.nginx },
+        { name: "PHP", version: this.versions.php },
         { name: "MariaDB", version: this.versions.mariadb },
-        { name: "phpMyAdmin", version: this.versions.phpmyadmin },
       ];
     },
     ...mapState(["instanceName", "instanceLabel", "core", "appName"]),
@@ -772,8 +798,13 @@ export default {
 // same layout as the backup card next to it
 .stack-table {
   width: 100%;
-  max-width: 16rem;
+  max-width: 11rem;
   margin: 0 auto;
+}
+
+// the card centers its rows, which shrinks them to their content
+.stack-row {
+  width: 100%;
 }
 
 .stack-table td {

@@ -33,7 +33,8 @@
     "search_volumes": "Volumes suchen",
     "website": "Website",
     "stack": "Stack",
-    "open_phpmyadmin": "phpMyAdmin öffnen"
+    "open_phpmyadmin": "phpMyAdmin öffnen",
+    "phpmyadmin_disabled": "Deaktiviert"
   },
   "about": {
     "title": "Über"

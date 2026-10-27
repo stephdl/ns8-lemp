@@ -33,7 +33,8 @@
     "search_volumes": "Search volumes",
     "website": "Web site",
     "stack": "Stack",
-    "open_phpmyadmin": "Open phpMyAdmin"
+    "open_phpmyadmin": "Open phpMyAdmin",
+    "phpmyadmin_disabled": "Disabled"
   },
   "about": {
     "title": "About"

@@ -33,7 +33,8 @@
     "search_volumes": "Procurar volumes",
     "website": "Site",
     "stack": "Pilha de software",
-    "open_phpmyadmin": "Abrir o phpMyAdmin"
+    "open_phpmyadmin": "Abrir o phpMyAdmin",
+    "phpmyadmin_disabled": "Desativado"
   },
   "about": {
     "title": "Sobre"
