@@ -21,3 +21,4 @@ agent.set_route({
     "lets_encrypt_check": True,
     "lets_encrypt_cleanup": True,
 })
+agent.set_env("ROUTE_HOST", data["host"])

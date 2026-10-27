@@ -21,6 +21,7 @@ if user_domain and user_domain not in Ldapproxy().get_domains_list():
 
 # A plain clone keeps running next to its source: the admin must give it a new host name
 if not request.get("replace"):
+    agent.unset_env("ROUTE_HOST")
     if user_domain:
         agent.bind_user_domains([user_domain])
     print(agent.SD_WARNING + "Cloned instance has no web route, set a new host name in Settings", file=sys.stderr)

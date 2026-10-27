@@ -15,9 +15,13 @@ agent.set_weight(os.path.basename(__file__), 0)
 data = json.load(sys.stdin)
 host = data["host"]
 
-# A clone keeps the host of its source but has no route: the check applies to it
-route = agent.get_route(os.environ["MODULE_ID"])
-if route.get("host") != host and agent.http_route_in_use(domain=host):
+# ROUTE_HOST is the host of our own route: a plain clone drops it, a move keeps it.
+# It needs no Traefik call, so a slow Traefik never turns our own route into a conflict.
+# Without it (an instance from an older release, a plain clone) ask Traefik.
+route_host = os.environ.get("ROUTE_HOST")
+if route_host is None:
+    route_host = agent.get_route(os.environ["MODULE_ID"]).get("host")
+if host != route_host and agent.http_route_in_use(domain=host):
     agent.set_status("validation-failed")
     json.dump([{"field": "host", "parameter": "host", "value": host, "error": "domain_already_used_in_traefik"}], fp=sys.stdout)
     sys.exit(2)
