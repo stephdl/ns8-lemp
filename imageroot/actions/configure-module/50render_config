@@ -8,4 +8,4 @@
 set -e
 exec 1>&2
 
-runagent lemp-render-config
+runagent lemp-render-config --no-test
