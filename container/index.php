@@ -35,6 +35,7 @@ $os = @parse_ini_file('/etc/os-release');
         <tr><td>Database</td><td><?= htmlspecialchars(getenv('LEMP_DB_NAME') ?: '') ?></td></tr>
         <tr><td>PHP container OS</td><td><?= htmlspecialchars($os['PRETTY_NAME'] ?? '') ?></td></tr>
     </table>
-    <p>Delete <code>index.php</code> once your application is installed.</p>
+    <p>See the <a href="phpinfo.php">PHP configuration</a>.</p>
+    <p>Delete <code>index.php</code> and <code>phpinfo.php</code> once your application is installed.</p>
 </body>
 </html>

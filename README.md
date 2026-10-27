@@ -17,7 +17,7 @@ PHP 8.2, 8.3, 8.4 and 8.5 are available. Only the image of the selected version 
 The PHP image loads the same extensions as ns8-lamp (gd, intl, ldap, imagick, imap, apcu, memcached,
 mysqli, pdo_mysql, opcache, soap, sockets, xsl, zip and more). The build fails if one is missing.
 It also has composer, msmtp and the admin tools of ns8-lamp (vim, nano, git, wget, curl, zip, ftp,
-mariadb client).
+rsync, ssh, sftp, scp, mariadb client).
 
 ## Install
 
@@ -83,31 +83,55 @@ The module scripts use it for the dumps and the account changes.
 
 ## Customize
 
-Each service has custom files in the module state directory. The module creates them once and never overwrites them.
-They are loaded after the module settings, so they win.
+Each service has custom files in the module state directory. The module creates them once, with a commented
+example, and never overwrites them. They are loaded after the module settings, so they win.
+The backup, the restore and the clone keep them.
 
-| File | Service |
-|---|---|
-| `nginx/custom.d/*.conf` | nginx directives, included in the `server` block |
-| `php/php.d/90-custom.ini` | PHP settings |
-| `php/fpm.d/90-custom.conf` | PHP-FPM pool, start the file with `[www]` |
-| `mariadb/90-custom.cnf` | MariaDB settings, start the file with `[mysqld]` |
-| `crontab` | cron jobs, in `/etc/cron.d` format with a user field |
+| File | Service | Example |
+|---|---|---|
+| `nginx/custom.d/*.conf` | nginx, included in the `server` block | `location /private/ { deny all; }` |
+| `php/php.d/90-custom.ini` | PHP | `max_input_vars = 5000` |
+| `php/fpm.d/90-custom.conf` | PHP-FPM pool, start the file with `[www]` | `pm.max_requests = 500` |
+| `mariadb/90-custom.cnf` | MariaDB server, start the file with `[mysqld]` | `max_connections = 300` |
+| `crontab` | cron jobs, see [Cron](#cron) | `*/5 * * * * www-data php /app/cron.php` |
 
-Edit them from the module environment:
+nginx ignores `.htaccess` files. Put the rewrite rules of an application in `nginx/custom.d/`.
+
+Edit the files from the module environment:
 
     runagent -m lemp1
-    vi nginx/custom.d/90-custom.conf
+    vi php/php.d/90-custom.ini
 
 Then save the Settings page, or run `configure-module` again. The module tests nginx, PHP-FPM, PHP and MariaDB
 with the new files before the restart. A broken file stops the action with the error in the task log,
 and the running site keeps its current configuration.
 
-A cron job example, run every 5 minutes:
+Check the applied values:
+
+    runagent -m lemp1 podman exec nginx-app nginx -T
+    runagent -m lemp1 podman exec php-fpm-app php -i
+    runagent -m lemp1 podman exec php-fpm-app php-fpm -tt
+    runagent -m lemp1 podman exec mariadb-app mariadbd --print-defaults
+
+## Cron
+
+The cron jobs of the site are in the `crontab` file of the module state directory. It is kept by backup,
+restore and clone. The `cron-app` container runs them with the PHP image of the site.
+
+    runagent -m lemp1
+    vi crontab
+
+Use the `/etc/cron.d` format, with a user field. Run PHP jobs as `www-data`:
 
     */5 * * * * www-data php /app/cron.php
 
-The cron jobs see the `LEMP_*` variables too.
+Then restart the cron container, or save the Settings page:
+
+    runagent -m lemp1 systemctl --user restart cron-app.service
+
+Do not use `crontab -e` inside a container: that crontab is lost at the next restart.
+The jobs see the `LEMP_*` variables, and `mail()` works from them. cron drops the output of the jobs:
+send it to a file if you need it, outside `/app` so the web server never serves it.
 
 ## Deploy a site
 
@@ -115,14 +139,15 @@ The site lives in the `app` volume, mounted on `/app` in the PHP containers:
 
     runagent -m lemp1 podman exec -ti php-fpm-app bash
 
-Download it with git, wget, curl, ftp or composer, then give the files to `www-data`:
+Download it with git, wget, curl, rsync, sftp, ftp or composer, then give the files to `www-data`:
 
     cd /app
     git clone https://example.org/my/site.git .
     chown -R www-data:www-data /app
 
-A fresh instance has an `index.php` page. Delete it once the site is installed.
-There is no `phpinfo.php` page: `phpinfo()` shows the database password that PHP-FPM gives to the site.
+A fresh instance has an `index.php` page and a `phpinfo.php` page. Delete them once the site is installed.
+`phpinfo.php` leaves out the Environment and Variables sections: they would show the database password
+that PHP-FPM gives to the site. Never call `phpinfo()` without arguments on a public page.
 
 ### WordPress example
 
@@ -131,7 +156,7 @@ Set `nginx_preset` to `wordpress` in the Advanced section of the Settings page, 
 Download WordPress into the `app` volume, as `www-data`:
 
     runagent -m lemp1 podman exec -ti -u www-data -w /app php-fpm-app bash
-    rm -f index.php
+    rm -f index.php phpinfo.php
     curl -sL https://wordpress.org/latest.tar.gz | tar xz --strip-components=1
 
 Create `wp-config.php` from the module variables with [WP-CLI](https://wp-cli.org/), in the same shell:

@@ -121,11 +121,11 @@ Check the site answers over HTTPS
     Should Contain    ${page}    NS8 LEMP is running
     Should Contain    ${page}    MariaDB</td><td>12.3.3
 
-Check no phpinfo page is shipped
-    ${code} =    HTTP code    /phpinfo.php
-    Should Be Equal    ${code}    404
-    # The PHP checks below read the ini values from a test page
-    In the module    podman exec -u www-data php-fpm-app sh -c 'echo "<?php phpinfo();" > /app/phpinfo.php'
+Check the phpinfo page hides the passwords
+    ${page} =    Fetch    /phpinfo.php
+    Should Contain    ${page}    memory_limit
+    Should Not Contain    ${page}    ${DB_PASSWORD}
+    Should Not Contain    ${page}    LEMP_DB_PASSWORD
 
 Check the site can call itself
     ${code} =    In the module    podman exec php-fpm-app curl -sk -o /dev/null -w "\%{http_code}" https://${TEST_HOST}/
