@@ -20,7 +20,7 @@ ExecStartPre=/bin/rm -f %t/phpmyadmin-app.pid %t/phpmyadmin-app.ctr-id
 ExecStart=/usr/bin/podman run --conmon-pidfile %t/phpmyadmin-app.pid \
     --cidfile %t/phpmyadmin-app.ctr-id --cgroups=no-conmon \
     --pod-id-file %t/lemp.pod-id --replace -d --name phpmyadmin-app \
-    --volume %S/state/phpmyadmin/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf:ro,Z \
+    --volume %S/state/phpmyadmin/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf:ro,z \
     --env PMA_HOST=127.0.0.1 \
     --env PMA_PORT=3306 \
     --env PMA_ABSOLUTE_URI=https://${TRAEFIK_HOST}/phpmyadmin/ \
