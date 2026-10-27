@@ -101,6 +101,10 @@ Check the site answers over HTTPS
     Should Contain    ${page}    NS8 LEMP is running
     Should Contain    ${page}    MariaDB</td><td>12.3.3
 
+Check the site can call itself
+    ${code} =    In the module    podman exec php-fpm-app curl -sk -o /dev/null -w "\%{http_code}" https://${TEST_HOST}/
+    Should Be Equal    ${code}    200
+
 Check the database accounts
     ${output}    ${rc} =    SQL as    app    ${DB_PASSWORD}    SELECT DATABASE() FROM DUAL; SHOW DATABASES;
     Should Be Equal As Integers    ${rc}    0
