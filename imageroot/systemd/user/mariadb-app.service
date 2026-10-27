@@ -24,7 +24,7 @@ ExecStart=/usr/bin/podman run --conmon-pidfile %t/mariadb-app.pid \
     --env MARIADB_ROOT_HOST=localhost \
     --env MARIADB_AUTO_UPGRADE=1 \
     ${MARIADB_IMAGE}
-ExecStartPost=/usr/bin/podman exec mariadb-app /bin/sh -c 'until mariadb-admin ping -h127.0.0.1 --protocol=tcp --silent; do sleep 1; done'
+ExecStartPost=/usr/bin/podman exec mariadb-app /bin/sh -c 'until healthcheck.sh --connect; do sleep 1; done'
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/mariadb-app.ctr-id -t 10
 ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/mariadb-app.ctr-id
 SyslogIdentifier=%u
