@@ -14,29 +14,14 @@ LABEL org.opencontainers.image.source="https://github.com/stephdl/ns8-lemp"
 COPY --from=extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 
-# Same extension set as ns8-lamp, so applications move from one to the other
-RUN install-php-extensions \
-        apcu \
-        bcmath \
-        bz2 \
-        exif \
-        ftp \
-        gd \
-        gettext \
-        gmp \
-        imagick \
-        imap \
-        intl \
-        ldap \
-        memcached \
-        mysqli \
-        odbc \
-        opcache \
-        pdo_mysql \
-        pdo_odbc \
-        soap \
-        tidy \
-        zip && \
+# Same extensions as php -m in the ns8-lamp image, so applications move from one to the other.
+# Ubuntu packages bring some of them implicitly (php-common, php-xml, php-memcached).
+# One list for the install and for the build check below, so they cannot drift.
+# opcache is checked apart: php -m lists it as "Zend OPcache".
+ENV LEMP_PHP_EXTENSIONS="apcu bcmath bz2 calendar exif ffi ftp gd gettext gmp igbinary imagick \
+imap intl ldap memcached msgpack mysqli odbc pcntl pdo_mysql pdo_odbc shmop soap sockets \
+sysvmsg sysvsem sysvshm tidy xsl zip"
+RUN install-php-extensions ${LEMP_PHP_EXTENSIONS} opcache && \
     rm /usr/local/bin/install-php-extensions
 
 # Admin tools of ns8-lamp. msmtp replaces ssmtp, which is no longer maintained
@@ -64,8 +49,7 @@ RUN ln -s /usr/local/bin/php /usr/bin/php && \
 
 # Fail the build if an extension is not loaded or misses a shared library
 RUN missing=0; \
-    for ext in apcu bcmath bz2 exif ftp gd gettext gmp imagick imap intl ldap memcached \
-               mysqli odbc pdo_mysql pdo_odbc soap tidy zip; do \
+    for ext in ${LEMP_PHP_EXTENSIONS}; do \
         php -m | grep -qix "${ext}" || { echo "Missing PHP extension: ${ext}" >&2; missing=1; }; \
     done; \
     php -v | grep -q "with Zend OPcache" || { echo "Missing PHP extension: opcache" >&2; missing=1; }; \
