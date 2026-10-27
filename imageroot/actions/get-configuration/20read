@@ -41,7 +41,6 @@ config = {
     "php_max_execution_time": int(os.getenv("PHP_MAX_EXECUTION_TIME", "600")),
     "php_timezone": os.getenv("PHP_TIMEZONE", "UTC"),
     "fpm_pm_max_children": int(os.getenv("FPM_PM_MAX_CHILDREN", "10")),
-    "mariadb_innodb_buffer_pool_size": os.getenv("MARIADB_INNODB_BUFFER_POOL_SIZE", "256M"),
     "phpmyadmin_enabled": os.getenv("PHPMYADMIN_ENABLED", "True") == "True",
     "db_name": os.getenv("DB_NAME", "app"),
     "db_user": os.getenv("DB_USER", "app"),

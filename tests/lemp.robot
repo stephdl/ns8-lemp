@@ -11,7 +11,7 @@ ${DB_PASSWORD}       Ns8,Lemp-Db1
 ${DB_PASSWORD2}      Ns8,Lemp-Db2
 ${MARIADB_ADMIN}     Ns8,Lemp-Admin1
 ${MARIADB_ADMIN2}    Ns8,Lemp-Admin2
-${BASE_CONFIG}       "host":"${TEST_HOST}","lets_encrypt":false,"document_root":"","nginx_preset":"generic","php_memory_limit":"256M","php_upload_max_filesize":"64M","php_max_execution_time":300,"php_timezone":"Europe/Paris","fpm_pm_max_children":5,"mariadb_innodb_buffer_pool_size":"128M","phpmyadmin_enabled":true,"db_name":"app","db_user":"app","user_domain":"","mail_from":""
+${BASE_CONFIG}       "host":"${TEST_HOST}","lets_encrypt":false,"document_root":"","nginx_preset":"generic","php_memory_limit":"256M","php_upload_max_filesize":"64M","php_max_execution_time":300,"php_timezone":"Europe/Paris","fpm_pm_max_children":5,"phpmyadmin_enabled":true,"db_name":"app","db_user":"app","user_domain":"","mail_from":""
 
 *** Keywords ***
 An invalid custom file is refused
@@ -254,11 +254,29 @@ Check the PHP-FPM workers change
     ${fpm} =    In the module    podman exec php-fpm-app sh -c 'php-fpm -tt 2>&1'
     Should Match Regexp    ${fpm}    pm.max_children = 7\\b
 
-Check the InnoDB buffer pool changes
-    Configure    "php_version":"8.4","mariadb_innodb_buffer_pool_size":"192M"
+Check the InnoDB buffer pool follows the node memory
+    # 5% of the node memory in 64 MiB steps, between 128 MiB and 1 GiB
+    ${kib} =    Execute Command    awk '/^MemTotal:/ {print $2}' /proc/meminfo
+    ${mib} =    Evaluate    min(max(int(${kib}) // 1024 * 5 // 100 // 64 * 64, 128), 1024)
     ${output}    ${rc} =    SQL as    admin    ${MARIADB_ADMIN}    SELECT @@innodb_buffer_pool_size;
     Should Be Equal As Integers    ${rc}    0
-    Should Be Equal    ${output}    201326592
+    Should Be Equal As Integers    ${output}    ${mib * 1024 * 1024}
+
+Check the memory limit must exceed the upload limit
+    ${output} =    Configure    "php_version":"8.4","php_memory_limit":"64M","php_upload_max_filesize":"64M"    rc_expected=2
+    Should Contain    ${output}    php_memory_limit_too_low
+
+Check the execution time can be unlimited
+    Configure    "php_version":"8.4","php_max_execution_time":0
+    Wait Until Keyword Succeeds    60 seconds    2 seconds    The site answers
+    ${page} =    Fetch    /phpinfo.php
+    Should Contain    ${page}    <tr><td class="e">max_execution_time</td><td class="v">0</td>
+    ${nginx} =    In the module    podman exec nginx-app nginx -T
+    Should Contain    ${nginx}    fastcgi_read_timeout 86400s;
+    ${fpm} =    In the module    podman exec php-fpm-app sh -c 'php-fpm -tt 2>&1'
+    Should Match Regexp    ${fpm}    request_terminate_timeout = 0\\b
+    ${output} =    Configure    "php_version":"8.4","php_max_execution_time":7200    rc_expected=10
+    Configure    "php_version":"8.4"
 
 Check the document root changes
     In the module    podman exec -u www-data php-fpm-app sh -c 'mkdir -p /app/public && echo "<?php echo \\"docroot=public\\";" > /app/public/index.php'

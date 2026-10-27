@@ -15,7 +15,6 @@
             "php_max_execution_time": 600,
             "php_timezone": "UTC",
             "fpm_pm_max_children": 10,
-            "mariadb_innodb_buffer_pool_size": "256M",
             "phpmyadmin_enabled": true,
             "db_name": "app",
             "db_user": "app",
@@ -37,7 +36,6 @@
         "php_max_execution_time",
         "php_timezone",
         "fpm_pm_max_children",
-        "mariadb_innodb_buffer_pool_size",
         "phpmyadmin_enabled",
         "db_name",
         "db_user",
@@ -82,8 +80,9 @@
         },
         "php_max_execution_time": {
             "type": "integer",
-            "minimum": 1,
-            "maximum": 86400
+            "description": "Seconds a PHP script can run, 0 for no limit",
+            "minimum": 0,
+            "maximum": 3600
         },
         "php_timezone": {
             "type": "string",
@@ -93,10 +92,6 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 500
-        },
-        "mariadb_innodb_buffer_pool_size": {
-            "type": "string",
-            "pattern": "^[1-9][0-9]*[KMG]$"
         },
         "phpmyadmin_enabled": {
             "type": "boolean"

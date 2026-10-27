@@ -17,7 +17,6 @@ SETTINGS = [
     ("php_max_execution_time", "PHP_MAX_EXECUTION_TIME", 600, int),
     ("php_timezone", "PHP_TIMEZONE", "UTC", str),
     ("fpm_pm_max_children", "FPM_PM_MAX_CHILDREN", 10, int),
-    ("mariadb_innodb_buffer_pool_size", "MARIADB_INNODB_BUFFER_POOL_SIZE", "256M", str),
     ("phpmyadmin_enabled", "PHPMYADMIN_ENABLED", True, bool),
     ("db_name", "DB_NAME", "app", str),
     ("db_user", "DB_USER", "app", str),
@@ -26,6 +25,19 @@ SETTINGS = [
 ]
 
 ENV_VARS = [var for _, var, _, _ in SETTINGS]
+
+MAX_EXECUTION_TIME = 3600
+
+
+def size_mib(size):
+    # PHP size like 512M, 1G or 1536K, in MiB
+    number, unit = int(size[:-1]), size[-1].upper()
+    return number * {"K": 1 / 1024, "M": 1, "G": 1024}[unit]
+
+
+def memory_fits_upload(data):
+    # A whole request body must fit in memory_limit, with room for the script itself
+    return size_mib(data["php_memory_limit"]) > size_mib(data["php_upload_max_filesize"])
 
 
 def env_from_request(data):
@@ -44,6 +56,11 @@ def request_from_env(env):
             request[field] = value == "True"
         else:
             request[field] = kind(value)
+    # Settings saved by an older release may break newer rules: bring them back in range,
+    # so a clone or a restore of that release never fails its validation
+    request["php_max_execution_time"] = min(request["php_max_execution_time"], MAX_EXECUTION_TIME)
+    if not memory_fits_upload(request):
+        request["php_memory_limit"] = f"{int(size_mib(request['php_upload_max_filesize'])) * 2}M"
     return request
 
 

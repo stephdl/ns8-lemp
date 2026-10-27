@@ -16,7 +16,6 @@
         "php_max_execution_time",
         "php_timezone",
         "fpm_pm_max_children",
-        "mariadb_innodb_buffer_pool_size",
         "phpmyadmin_enabled",
         "db_name",
         "db_user",
@@ -71,9 +70,6 @@
         },
         "fpm_pm_max_children": {
             "type": "integer"
-        },
-        "mariadb_innodb_buffer_pool_size": {
-            "type": "string"
         },
         "phpmyadmin_enabled": {
             "type": "boolean"
