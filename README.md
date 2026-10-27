@@ -124,13 +124,25 @@ A fresh instance has an `index.php` page and a `phpinfo.php` page. Delete them o
 
 ### WordPress example
 
-    runagent -m lemp1 podman exec -ti php-fpm-app bash
-    cd /app && rm -f index.php phpinfo.php
-    curl -sL https://wordpress.org/latest.tar.gz | tar xz --strip-components=1
-    chown -R www-data:www-data /app
+Set `nginx_preset` to `wordpress` in the Advanced section of the Settings page, then save.
 
-Set `nginx_preset` to `wordpress`, then open the site and use the database name, user and password of the module,
-with `127.0.0.1` as the database host.
+Download WordPress into the `app` volume, as `www-data`:
+
+    runagent -m lemp1 podman exec -ti -u www-data -w /app php-fpm-app bash
+    rm -f index.php phpinfo.php
+    curl -sL https://wordpress.org/latest.tar.gz | tar xz --strip-components=1
+
+Create `wp-config.php` from the module variables with [WP-CLI](https://wp-cli.org/), in the same shell:
+
+    curl -sLo /tmp/wp https://github.com/wp-cli/wp-cli/releases/download/v2.12.0/wp-cli-2.12.0.phar
+    php /tmp/wp config create --dbname="$LEMP_DB_NAME" --dbuser="$LEMP_DB_USER" \
+        --dbpass="$LEMP_DB_PASSWORD" --dbhost="$LEMP_DB_HOST:$LEMP_DB_PORT" --skip-check
+
+Then open `https://<host>/` and finish the install in the browser. You can also skip WP-CLI:
+the browser installer asks for the database name, user and password of the module, with `127.0.0.1` as the database host.
+
+Pretty permalinks work with the preset. The site reaches itself through Traefik, so WP-Cron
+and the Site Health loopback test work. WP-CLI in `/tmp` goes away when the container restarts.
 
 ## Mail
 
@@ -176,4 +188,5 @@ and each PHP image on its own minor version. A new PHP minor version is added by
 
 ## UI translation
 
-Translated with [Weblate](https://hosted.weblate.org/projects/ns8/).
+The UI is translated in English, French, Italian, German, Spanish, Portuguese, Brazilian Portuguese, Basque, Dutch and Arabic.
+The files are in `ui/public/i18n/`. The module is not on Weblate yet.
