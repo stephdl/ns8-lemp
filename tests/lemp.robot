@@ -263,7 +263,7 @@ Check the InnoDB buffer pool follows the node memory
     Should Be Equal As Integers    ${output}    ${mib * 1024 * 1024}
 
 Check the memory limit must exceed the upload limit
-    ${output} =    Configure    "php_version":"8.4","php_memory_limit":"64M","php_upload_max_filesize":"64M"    rc_expected=2
+    ${output} =    Configure    "php_version":"8.4","php_memory_limit":"256M","php_upload_max_filesize":"256M"    rc_expected=2
     Should Contain    ${output}    php_memory_limit_too_low
 
 Check the execution time can be unlimited
@@ -274,7 +274,7 @@ Check the execution time can be unlimited
     ${nginx} =    In the module    podman exec nginx-app nginx -T
     Should Contain    ${nginx}    fastcgi_read_timeout 86400s;
     ${fpm} =    In the module    podman exec php-fpm-app sh -c 'php-fpm -tt 2>&1'
-    Should Match Regexp    ${fpm}    request_terminate_timeout = 0\\b
+    Should Match Regexp    ${fpm}    request_terminate_timeout = 0s?\\b
     ${output} =    Configure    "php_version":"8.4","php_max_execution_time":7200    rc_expected=10
     Configure    "php_version":"8.4"
 
