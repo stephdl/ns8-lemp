@@ -103,11 +103,25 @@ Then save the Settings page, or run `configure-module` again. The module tests n
 with the new files before the restart. A broken file stops the action with the error in the task log,
 and the running site keeps its current configuration.
 
-A cron job example, run every 5 minutes:
+## Cron
+
+The cron jobs of the site are in the `crontab` file of the module state directory. It is kept by backup,
+restore and clone. The `cron-app` container runs them with the PHP image of the site.
+
+    runagent -m lemp1
+    vi crontab
+
+Use the `/etc/cron.d` format, with a user field. Run PHP jobs as `www-data`:
 
     */5 * * * * www-data php /app/cron.php
 
-The cron jobs see the `LEMP_*` variables too.
+Then restart the cron container, or save the Settings page:
+
+    runagent -m lemp1 systemctl --user restart cron-app.service
+
+Do not use `crontab -e` inside a container: that crontab is lost at the next restart.
+The jobs see the `LEMP_*` variables, and `mail()` works from them. cron drops the output of the jobs:
+send it to a file if you need it, outside `/app` so the web server never serves it.
 
 ## Deploy a site
 
