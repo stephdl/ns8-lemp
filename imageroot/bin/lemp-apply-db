@@ -33,13 +33,16 @@ db_user = os.environ["DB_USER"]
 db_password = read_env_file("secrets/db.env").get("LEMP_DB_PASSWORD", "")
 admin_password = read_env_file("secrets/admin.env").get("MARIADB_ADMIN_PASSWORD", "")
 
+# In a database grant _ is a wildcard: my_site would also match my1site
+grant_db = db_name.replace("_", "\\_")
+
 sql = [f"CREATE DATABASE IF NOT EXISTS `{db_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"]
 # An account is created only with its password, never open without one
 if db_password:
     sql += [
         f"CREATE USER IF NOT EXISTS {quote(db_user)}@'%' IDENTIFIED BY {quote(db_password)};",
         f"ALTER USER {quote(db_user)}@'%' IDENTIFIED BY {quote(db_password)};",
-        f"GRANT ALL PRIVILEGES ON `{db_name}`.* TO {quote(db_user)}@'%';",
+        f"GRANT ALL PRIVILEGES ON `{grant_db}`.* TO {quote(db_user)}@'%';",
     ]
 if admin_password:
     sql += [
