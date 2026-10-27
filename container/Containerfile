@@ -81,7 +81,7 @@ RUN cp "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini" && \
     echo "include=/etc/lemp/fpm.d/*.conf" >> /usr/local/etc/php-fpm.conf && \
     mkdir -p /etc/lemp/php.d /etc/lemp/fpm.d
 
-COPY --chmod=0755 lemp-entrypoint /usr/local/bin/lemp-entrypoint
+COPY --chmod=0755 lemp-entrypoint lemp-cron-shell /usr/local/bin/
 COPY index.php /usr/local/share/lemp/
 
 WORKDIR /app

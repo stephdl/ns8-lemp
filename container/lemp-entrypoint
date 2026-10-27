@@ -13,10 +13,15 @@ if [[ "$1" == "php-fpm" && -z "$(ls -A /app)" ]]; then
     chown -R www-data:www-data /app
 fi
 
-# Cron jobs start with an empty environment: pam_env gives them this file
+# Cron jobs start with an empty environment. pam_env cuts values at "#", which a
+# password may hold, so lemp-cron-shell loads the variables from a bash file instead.
 if [[ "$1" == "cron" ]]; then
-    env | grep -E '^(LEMP_|NS8_HOSTNAME=|MAIL_FROM=)' > /etc/environment || :
-    chmod 0644 /etc/environment
+    install -m 0640 -g www-data /dev/null /etc/lemp/cron.env
+    for var in $(compgen -e | grep -E '^(LEMP_|NS8_HOSTNAME$|MAIL_FROM$)'); do
+        declare -p "${var}" >> /etc/lemp/cron.env
+    done
+    { echo "SHELL=/usr/local/bin/lemp-cron-shell"; cat /etc/lemp/crontab; } > /etc/cron.d/lemp
+    chmod 0644 /etc/cron.d/lemp
 fi
 
 rm -f /etc/msmtprc

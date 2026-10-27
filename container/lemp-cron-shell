@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# cron runs each job with this shell: give the job the module variables
+source /etc/lemp/cron.env
+exec /bin/sh "$@"
