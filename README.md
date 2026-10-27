@@ -130,8 +130,9 @@ Then restart the cron container, or save the Settings page:
     runagent -m lemp1 systemctl --user restart cron-app.service
 
 Do not use `crontab -e` inside a container: that crontab is lost at the next restart.
-The jobs see the `LEMP_*` variables, and `mail()` works from them. cron drops the output of the jobs:
-send it to a file if you need it, outside `/app` so the web server never serves it.
+The jobs see the `LEMP_*` variables, and `mail()` works from them. Their output goes to the journal:
+
+    journalctl _UID=$(id -u lemp1) CONTAINER_NAME=cron-app
 
 ## Deploy a site
 
