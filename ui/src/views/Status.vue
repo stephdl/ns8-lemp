@@ -93,7 +93,14 @@
           >
             <template slot="content">
               <div class="card-rows">
-                <div class="card-row">
+                <div v-if="loading.getConfiguration" class="card-row">
+                  <cv-skeleton-text
+                    :paragraph="true"
+                    :line-count="3"
+                    class="stack-table"
+                  ></cv-skeleton-text>
+                </div>
+                <div v-else class="card-row">
                   <table class="stack-table">
                     <tr v-for="item in stackRows" :key="item.name">
                       <td class="stack-label">{{ item.name }}</td>
