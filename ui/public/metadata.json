@@ -9,7 +9,9 @@
     "es": "Aloje un sitio web PHP con nginx, PHP-FPM 8.2 a 8.5, MariaDB y phpMyAdmin, con envío de correo a través del smarthost del clúster.",
     "pt": "Aloje um site web PHP com nginx, PHP-FPM 8.2 a 8.5, MariaDB e phpMyAdmin, com envio de correio através do smarthost do cluster.",
     "pt_BR": "Hospede um site PHP com nginx, PHP-FPM 8.2 a 8.5, MariaDB e phpMyAdmin, com envio de e-mail pelo smarthost do cluster.",
-    "eu": "Ostatatu PHP webgune bat nginx, PHP-FPM 8.2tik 8.5era, MariaDB eta phpMyAdmin-ekin, klusterraren smarthost bidezko posta-bidalketarekin."
+    "eu": "Ostatatu PHP webgune bat nginx, PHP-FPM 8.2tik 8.5era, MariaDB eta phpMyAdmin-ekin, klusterraren smarthost bidezko posta-bidalketarekin.",
+    "nl": "Host een PHP-website met nginx, PHP-FPM 8.2 tot 8.5, MariaDB en phpMyAdmin, met e-mail via de smarthost van het cluster.",
+    "ar": "استضف موقع PHP مع nginx و PHP-FPM من 8.2 إلى 8.5 و MariaDB و phpMyAdmin، مع إرسال البريد عبر المضيف الذكي للعنقود."
   },
   "categories": ["web", "development"],
   "authors": [
