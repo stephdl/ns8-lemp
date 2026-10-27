@@ -278,6 +278,26 @@ Check the execution time can be unlimited
     ${output} =    Configure    "php_version":"8.4","php_max_execution_time":7200    rc_expected=10
     Configure    "php_version":"8.4"
 
+Check an update brings old settings in range
+    # Settings an older release could hold: buffer pool in the environment, sizes in K,
+    # memory below upload, execution time and workers above the current limits
+    In the module    python3 -c 'import agent; [agent.set_env(k, v) for k, v in {"MARIADB_INNODB_BUFFER_POOL_SIZE": "160M", "PHP_MEMORY_LIMIT": "131072K", "PHP_UPLOAD_MAX_FILESIZE": "256M", "PHP_MAX_EXECUTION_TIME": "7200", "FPM_PM_MAX_CHILDREN": "200"}.items()]'
+    ${output}  ${rc} =    Execute Command    api-cli run update-module --data '{"module_url":"${IMAGE_URL}","instances":["${module_id}"],"force":true}'    return_rc=True
+    Should Be Equal As Integers    ${rc}    0    ${output}
+    ${config} =    Run task    module/${module_id}/get-configuration    {}
+    Should Be Equal    ${config['php_upload_max_filesize']}    256M
+    Should Be Equal    ${config['php_memory_limit']}    512M
+    Should Be Equal As Integers    ${config['php_max_execution_time']}    3600
+    Should Be Equal As Integers    ${config['fpm_pm_max_children']}    100
+    ${env} =    In the module    sh -c 'env | grep -c "^MARIADB_INNODB_BUFFER_POOL_SIZE=" || true'
+    Should Be Equal    ${env}    0
+    Wait Until Keyword Succeeds    60 seconds    2 seconds    The site answers
+    ${output}    ${rc} =    SQL as    admin    ${MARIADB_ADMIN}    SELECT @@innodb_buffer_pool_size;
+    Should Be Equal As Integers    ${output}    167772160
+    In the module    sh -c 'grep -q "^innodb_buffer_pool_size = 160M$" mariadb/90-custom.cnf'
+    In the module    sed -i '/Moved from the module settings/,/^innodb_buffer_pool_size/d' mariadb/90-custom.cnf
+    Configure    "php_version":"8.4"
+
 Check the document root changes
     In the module    podman exec -u www-data php-fpm-app sh -c 'mkdir -p /app/public && echo "<?php echo \\"docroot=public\\";" > /app/public/index.php'
     Configure    "php_version":"8.4","document_root":"public"
