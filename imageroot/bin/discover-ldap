@@ -20,8 +20,10 @@ if domain:
     except Exception as ex:
         print(agent.SD_WARNING + f"Cannot read user domain {domain}: {ex}", flush=True)
     if odom:
+        # ldapproxy listens on the node loopback, which the pod reaches as 10.0.2.2
+        host = "10.0.2.2" if odom["host"] in ("127.0.0.1", "localhost") else odom["host"]
         lines = [
-            f"LEMP_LDAP_HOST={odom['host']}",
+            f"LEMP_LDAP_HOST={host}",
             f"LEMP_LDAP_PORT={odom['port']}",
             f"LEMP_LDAP_SCHEMA={odom['schema']}",
             f"LEMP_LDAP_BASE={odom['base_dn']}",
