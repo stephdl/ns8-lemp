@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import os
+import sys
+import json
+import agent
+from agent.ldapproxy import Ldapproxy
+
+request = json.load(sys.stdin)
+
+user_domain = os.environ.get("USER_DOMAIN", "")
+if user_domain and user_domain not in Ldapproxy().get_domains_list():
+    print(agent.SD_WARNING + f"User domain {user_domain} not found, its LDAP credentials are no longer given to PHP", file=sys.stderr)
+    agent.set_env("USER_DOMAIN", "")
+    user_domain = ""
+
+# A plain clone keeps running next to its source: the admin must give it a new host name
+if not request.get("replace"):
+    if user_domain:
+        agent.bind_user_domains([user_domain])
+    print(agent.SD_WARNING + "Cloned instance has no web route, set a new host name in Settings", file=sys.stderr)
+    sys.exit(0)
+
+configure_retval = agent.tasks.run(agent_id=os.environ["AGENT_ID"], action="configure-module", data={
+    "host": os.environ["TRAEFIK_HOST"],
+    "lets_encrypt": os.environ.get("TRAEFIK_LETS_ENCRYPT") == "True",
+    "php_version": os.environ["PHP_VERSION"],
+    "document_root": os.environ.get("DOCUMENT_ROOT", ""),
+    "nginx_preset": os.environ["NGINX_PRESET"],
+    "php_memory_limit": os.environ["PHP_MEMORY_LIMIT"],
+    "php_upload_max_filesize": os.environ["PHP_UPLOAD_MAX_FILESIZE"],
+    "php_max_execution_time": int(os.environ["PHP_MAX_EXECUTION_TIME"]),
+    "php_timezone": os.environ["PHP_TIMEZONE"],
+    "fpm_pm_max_children": int(os.environ["FPM_PM_MAX_CHILDREN"]),
+    "mariadb_innodb_buffer_pool_size": os.environ["MARIADB_INNODB_BUFFER_POOL_SIZE"],
+    "phpmyadmin_enabled": os.environ.get("PHPMYADMIN_ENABLED") == "True",
+    "db_name": os.environ["DB_NAME"],
+    "db_user": os.environ["DB_USER"],
+    "user_domain": user_domain,
+    "mail_from": os.environ.get("MAIL_FROM", ""),
+})
+agent.assert_exp(configure_retval["exit_code"] == 0, "The configure-module subtask failed!")

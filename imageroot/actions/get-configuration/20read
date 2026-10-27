@@ -1,26 +1,65 @@
 #!/usr/bin/env python3
 
 #
-# Copyright (C) 2022 Nethesis S.r.l.
+# Copyright (C) 2026 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
-#
-
-#
-# Read configuration
 #
 
 import os
 import sys
 import json
+import subprocess
 import agent
+from agent.ldapproxy import Ldapproxy
 
-# Prepare return variable
-config = {}
+rdb = agent.redis_connect(use_replica=True)
+smarthost = agent.get_smarthost_settings(rdb)
+route = agent.get_route(os.environ["MODULE_ID"])
 
-# Read current configuration from the environment file
-config["host"] = os.getenv("TRAEFIK_HOST","")
-config["http2https"] = os.getenv("TRAEFIK_HTTP2HTTPS") == "True"
-config["lets_encrypt"] = agent.get_route(os.environ['MODULE_ID']).get('lets_encrypt', False)
 
-# Dump the configuration to stdout
+def image_tag(var):
+    image = os.getenv(var, "")
+    return image.rsplit(":", 1)[1] if ":" in image else ""
+
+
+# The PHP image tag is the module version: ask PHP for its own patch level
+php_running = ""
+proc = subprocess.run(["podman", "exec", "php-fpm-app", "php", "-r", "echo PHP_VERSION;"],
+                      stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+if proc.returncode == 0:
+    php_running = proc.stdout.strip()
+
+config = {
+    "host": os.getenv("TRAEFIK_HOST", ""),
+    "lets_encrypt": route.get("lets_encrypt", False),
+    "route_configured": bool(route),
+    "php_version": os.getenv("PHP_VERSION", "8.4"),
+    "document_root": os.getenv("DOCUMENT_ROOT", ""),
+    "nginx_preset": os.getenv("NGINX_PRESET", "generic"),
+    "php_memory_limit": os.getenv("PHP_MEMORY_LIMIT", "512M"),
+    "php_upload_max_filesize": os.getenv("PHP_UPLOAD_MAX_FILESIZE", "100M"),
+    "php_max_execution_time": int(os.getenv("PHP_MAX_EXECUTION_TIME", "600")),
+    "php_timezone": os.getenv("PHP_TIMEZONE", "UTC"),
+    "fpm_pm_max_children": int(os.getenv("FPM_PM_MAX_CHILDREN", "10")),
+    "mariadb_innodb_buffer_pool_size": os.getenv("MARIADB_INNODB_BUFFER_POOL_SIZE", "256M"),
+    "phpmyadmin_enabled": os.getenv("PHPMYADMIN_ENABLED", "True") == "True",
+    "db_name": os.getenv("DB_NAME", "app"),
+    "db_user": os.getenv("DB_USER", "app"),
+    "db_password_set": os.getenv("DB_PASSWORD_SET") == "True",
+    "admin_password_set": os.getenv("ADMIN_PASSWORD_SET") == "True",
+    "user_domain": os.getenv("USER_DOMAIN", ""),
+    "user_domains_list": sorted(Ldapproxy().get_domains_list()),
+    "mail_from": os.getenv("MAIL_FROM", ""),
+    "smarthost": {
+        "enabled": smarthost["enabled"] and smarthost["host"] != "",
+        "host": smarthost["host"],
+    },
+    "versions": {
+        "nginx": image_tag("NGINX_IMAGE"),
+        "mariadb": image_tag("MARIADB_IMAGE"),
+        "phpmyadmin": image_tag("PHPMYADMIN_IMAGE").removesuffix("-fpm"),
+        "php": php_running or os.getenv("PHP_VERSION", ""),
+    },
+}
+
 json.dump(config, fp=sys.stdout)

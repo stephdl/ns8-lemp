@@ -1,17 +1,15 @@
 #!/bin/bash
 
 #
-# Copyright (C) 2023 Nethesis S.r.l.
+# Copyright (C) 2026 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
+
 set -e
 
 # Redirect any output to the journal (stderr)
 exec 1>&2
 
-# If the control reaches this step, the service can be enabled and started
-
-touch smarthost.env
-
-systemctl --user enable kickstart.service
-systemctl --user restart kickstart.service
+systemctl --user enable lemp.service
+# Restarting only the pod does not restart its containers: list them all
+systemctl --user restart lemp.service mariadb-app.service php-fpm-app.service phpmyadmin-app.service nginx-app.service cron-app.service

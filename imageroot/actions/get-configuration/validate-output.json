@@ -1,36 +1,144 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Get kickstart settings",
-    "$id": "http://nethserver.org/json-schema/task/input/kickstart/get-configuration",
-    "description": "Get kickstart settings",
-    "examples": [
-        {
-            "host": "kickstart.domain.org",
-            "http2https": true,
-            "lets_encrypt": true
-        }
-    ],
+    "title": "Get lemp settings",
+    "$id": "http://nethserver.org/json-schema/task/output/lemp/get-configuration",
+    "description": "Get the lemp settings and the versions of the running stack",
     "type": "object",
     "required": [
         "host",
-        "http2https",
-        "lets_encrypt"
+        "lets_encrypt",
+        "route_configured",
+        "php_version",
+        "document_root",
+        "nginx_preset",
+        "php_memory_limit",
+        "php_upload_max_filesize",
+        "php_max_execution_time",
+        "php_timezone",
+        "fpm_pm_max_children",
+        "mariadb_innodb_buffer_pool_size",
+        "phpmyadmin_enabled",
+        "db_name",
+        "db_user",
+        "db_password_set",
+        "admin_password_set",
+        "user_domain",
+        "user_domains_list",
+        "mail_from",
+        "smarthost",
+        "versions"
     ],
     "properties": {
         "host": {
-            "type": "string",
-            "description": "Host name for the application, like 'kickstart.domain.org'",
-            "format": "idn-hostname"
+            "type": "string"
         },
         "lets_encrypt": {
-            "type": "boolean",
-            "title": "Let's Encrypt certificate",
-            "description": "Request a valid Let's Encrypt certificate."
+            "type": "boolean"
         },
-        "http2https": {
-            "type": "boolean",
-            "title": "HTTP to HTTPS redirection",
-            "description": "Redirect all the HTTP requests to HTTPS"
+        "route_configured": {
+            "type": "boolean"
+        },
+        "php_version": {
+            "type": "string",
+            "enum": [
+                "8.2",
+                "8.3",
+                "8.4",
+                "8.5"
+            ]
+        },
+        "document_root": {
+            "type": "string"
+        },
+        "nginx_preset": {
+            "type": "string",
+            "enum": [
+                "generic",
+                "wordpress"
+            ]
+        },
+        "php_memory_limit": {
+            "type": "string"
+        },
+        "php_upload_max_filesize": {
+            "type": "string"
+        },
+        "php_max_execution_time": {
+            "type": "integer"
+        },
+        "php_timezone": {
+            "type": "string"
+        },
+        "fpm_pm_max_children": {
+            "type": "integer"
+        },
+        "mariadb_innodb_buffer_pool_size": {
+            "type": "string"
+        },
+        "phpmyadmin_enabled": {
+            "type": "boolean"
+        },
+        "db_name": {
+            "type": "string"
+        },
+        "db_user": {
+            "type": "string"
+        },
+        "db_password_set": {
+            "type": "boolean"
+        },
+        "admin_password_set": {
+            "type": "boolean"
+        },
+        "user_domain": {
+            "type": "string"
+        },
+        "user_domains_list": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "mail_from": {
+            "type": "string"
+        },
+        "smarthost": {
+            "type": "object",
+            "required": [
+                "enabled",
+                "host"
+            ],
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "host": {
+                    "type": "string"
+                }
+            }
+        },
+        "versions": {
+            "type": "object",
+            "required": [
+                "nginx",
+                "mariadb",
+                "phpmyadmin",
+                "php"
+            ],
+            "properties": {
+                "nginx": {
+                    "type": "string"
+                },
+                "mariadb": {
+                    "type": "string"
+                },
+                "phpmyadmin": {
+                    "type": "string"
+                },
+                "php": {
+                    "type": "string"
+                }
+            }
         }
     }
 }

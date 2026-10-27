@@ -1,35 +1,133 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Configure kickstart",
-    "$id": "http://nethserver.org/json-schema/task/input/kickstart/configure-module",
-    "description": "Configure kickstart",
+    "title": "Configure lemp",
+    "$id": "http://nethserver.org/json-schema/task/input/lemp/configure-module",
+    "description": "Configure the nginx, PHP-FPM and MariaDB stack of the site",
     "examples": [
         {
-            "host": "kickstart.domain.org",
-            "http2https": true,
-            "lets_encrypt": true
+            "host": "www.example.org",
+            "lets_encrypt": true,
+            "php_version": "8.4",
+            "document_root": "",
+            "nginx_preset": "generic",
+            "php_memory_limit": "512M",
+            "php_upload_max_filesize": "100M",
+            "php_max_execution_time": 600,
+            "php_timezone": "UTC",
+            "fpm_pm_max_children": 10,
+            "mariadb_innodb_buffer_pool_size": "256M",
+            "phpmyadmin_enabled": true,
+            "db_name": "app",
+            "db_user": "app",
+            "db_password": "Nethesis,1234",
+            "admin_password": "Nethesis,1234",
+            "user_domain": "",
+            "mail_from": "noreply@www.example.org"
         }
     ],
     "type": "object",
     "required": [
-        "host"
+        "host",
+        "lets_encrypt",
+        "php_version",
+        "document_root",
+        "nginx_preset",
+        "php_memory_limit",
+        "php_upload_max_filesize",
+        "php_max_execution_time",
+        "php_timezone",
+        "fpm_pm_max_children",
+        "mariadb_innodb_buffer_pool_size",
+        "phpmyadmin_enabled",
+        "db_name",
+        "db_user",
+        "user_domain",
+        "mail_from"
     ],
     "properties": {
         "host": {
             "type": "string",
-            "description": "Host name for the application, like 'kickstart.domain.org'",
+            "description": "Host name of the site, like 'www.example.org'",
             "format": "hostname",
             "pattern": "\\."
         },
         "lets_encrypt": {
             "type": "boolean",
             "title": "Let's Encrypt certificate",
-            "description": "Request a valid Let's Encrypt certificate."
+            "description": "Request a valid Let's Encrypt certificate"
         },
-        "http2https": {
-            "type": "boolean",
-            "title": "HTTP to HTTPS redirection",
-            "description": "Redirect all the HTTP requests to HTTPS"
+        "php_version": {
+            "type": "string",
+            "enum": ["8.2", "8.3", "8.4", "8.5"]
+        },
+        "document_root": {
+            "type": "string",
+            "description": "Subdirectory of /app served by nginx, empty for /app itself",
+            "pattern": "^([A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*)?$",
+            "maxLength": 255
+        },
+        "nginx_preset": {
+            "type": "string",
+            "enum": ["generic", "wordpress"]
+        },
+        "php_memory_limit": {
+            "type": "string",
+            "description": "PHP memory_limit, like 512M or 1G",
+            "pattern": "^[1-9][0-9]*[KMG]$"
+        },
+        "php_upload_max_filesize": {
+            "type": "string",
+            "description": "Largest upload, used for PHP and nginx, like 100M",
+            "pattern": "^[1-9][0-9]*[KMG]$"
+        },
+        "php_max_execution_time": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400
+        },
+        "php_timezone": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_+/-]+$"
+        },
+        "fpm_pm_max_children": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+        },
+        "mariadb_innodb_buffer_pool_size": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*[KMG]$"
+        },
+        "phpmyadmin_enabled": {
+            "type": "boolean"
+        },
+        "db_name": {
+            "type": "string",
+            "description": "Database of the site, it cannot change after the first configuration",
+            "pattern": "^[A-Za-z0-9_]{1,64}$"
+        },
+        "db_user": {
+            "type": "string",
+            "description": "MariaDB user of the site, it cannot change after the first configuration",
+            "pattern": "^[A-Za-z0-9_]{1,32}$",
+            "not": {"enum": ["root", "admin", "mysql", "mariadb.sys", "healthcheck"]}
+        },
+        "db_password": {
+            "type": "string",
+            "description": "Password of the site MariaDB user, omit it to keep the current one"
+        },
+        "admin_password": {
+            "type": "string",
+            "description": "Password of the MariaDB 'admin' account, omit it to keep the current one"
+        },
+        "user_domain": {
+            "type": "string",
+            "description": "User domain whose bind credentials are given to PHP, empty for none"
+        },
+        "mail_from": {
+            "type": "string",
+            "description": "Default sender of mail() messages, empty for noreply@<host>",
+            "anyOf": [{"maxLength": 0}, {"format": "email"}]
         }
     }
 }

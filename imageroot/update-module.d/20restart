@@ -1,15 +1,22 @@
 #!/bin/bash
 
 #
-# Copyright (C) 2023 Nethesis S.r.l.
+# Copyright (C) 2026 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-
-# If the control reaches this step, the service can be enabled and started
 
 set -e
 
 # Redirect any output to the journal (stderr)
 exec 1>&2
 
-systemctl --user try-restart kickstart.service
+# Nothing to restart before the first configuration
+if [[ -z "${PHP_VERSION}" ]]; then
+    exit 0
+fi
+
+# The PHP-FPM image follows the module release, the files may get new settings
+runagent lemp-pull-php
+runagent lemp-render-config
+systemctl --user try-restart lemp.service mariadb-app.service php-fpm-app.service phpmyadmin-app.service nginx-app.service cron-app.service
+runagent lemp-clean-php-images
