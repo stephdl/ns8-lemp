@@ -15,8 +15,16 @@ agent.set_weight(os.path.basename(__file__), 0)
 
 data = json.load(sys.stdin)
 
-if not lemp.memory_fits_upload(data):
+errors = []
+for field, bounds in [("php_memory_limit", lemp.MEMORY_LIMIT_MIB),
+                      ("php_upload_max_filesize", lemp.UPLOAD_MAX_FILESIZE_MIB)]:
+    if not bounds[0] <= lemp.size_mib(data[field]) <= bounds[1]:
+        errors.append({"field": field, "parameter": field, "value": data[field], "error": field + "_out_of_range"})
+if not errors and not lemp.memory_fits_upload(data):
+    errors.append({"field": "php_memory_limit", "parameter": "php_memory_limit",
+                   "value": data["php_memory_limit"], "error": "php_memory_limit_too_low"})
+
+if errors:
     agent.set_status("validation-failed")
-    json.dump([{"field": "php_memory_limit", "parameter": "php_memory_limit",
-                "value": data["php_memory_limit"], "error": "php_memory_limit_too_low"}], fp=sys.stdout)
+    json.dump(errors, fp=sys.stdout)
     sys.exit(2)

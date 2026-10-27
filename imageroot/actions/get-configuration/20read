@@ -10,6 +10,7 @@ import sys
 import json
 import subprocess
 import agent
+import lemp
 from agent.ldapproxy import Ldapproxy
 
 rdb = agent.redis_connect(use_replica=True)
@@ -29,26 +30,16 @@ proc = subprocess.run(["podman", "exec", "php-fpm-app", "php", "-r", "echo PHP_V
 if proc.returncode == 0:
     php_running = proc.stdout.strip()
 
+# Same defaults and ranges as clone and restore. lets_encrypt is read from the route itself.
+settings = lemp.request_from_env(os.environ)
+
 config = {
-    "host": os.getenv("TRAEFIK_HOST", ""),
+    **settings,
     "lets_encrypt": route.get("lets_encrypt", False),
     "route_configured": bool(route),
-    "php_version": os.getenv("PHP_VERSION", "8.4"),
-    "document_root": os.getenv("DOCUMENT_ROOT", ""),
-    "nginx_preset": os.getenv("NGINX_PRESET", "generic"),
-    "php_memory_limit": os.getenv("PHP_MEMORY_LIMIT", "512M"),
-    "php_upload_max_filesize": os.getenv("PHP_UPLOAD_MAX_FILESIZE", "100M"),
-    "php_max_execution_time": int(os.getenv("PHP_MAX_EXECUTION_TIME", "600")),
-    "php_timezone": os.getenv("PHP_TIMEZONE", "UTC"),
-    "fpm_pm_max_children": int(os.getenv("FPM_PM_MAX_CHILDREN", "10")),
-    "phpmyadmin_enabled": os.getenv("PHPMYADMIN_ENABLED", "True") == "True",
-    "db_name": os.getenv("DB_NAME", "app"),
-    "db_user": os.getenv("DB_USER", "app"),
     "db_password_set": os.getenv("DB_PASSWORD_SET") == "True",
     "admin_password_set": os.getenv("ADMIN_PASSWORD_SET") == "True",
-    "user_domain": os.getenv("USER_DOMAIN", ""),
     "user_domains_list": sorted(Ldapproxy().get_domains_list()),
-    "mail_from": os.getenv("MAIL_FROM", ""),
     "smarthost": {
         "enabled": smarthost["enabled"] and smarthost["host"] != "",
         "host": smarthost["host"],

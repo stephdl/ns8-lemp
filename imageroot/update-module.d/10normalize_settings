@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Bring the settings of an older release inside the current rules, before 20restart
+# renders them. Runs in the module state directory.
+
+import os
+import sys
+import agent
+import lemp
+
+# Nothing to fix before the first configuration
+if not os.environ.get("PHP_VERSION"):
+    sys.exit(0)
+
+# The InnoDB buffer pool now follows the node memory. Keep a value the admin chose
+# by moving it to the custom file, which wins over the computed one.
+innodb = os.environ.get("MARIADB_INNODB_BUFFER_POOL_SIZE")
+if innodb is not None:
+    if innodb != "256M":
+        os.umask(0o022)
+        os.makedirs("mariadb", exist_ok=True)
+        with open("mariadb/90-custom.cnf", "a") as fp:
+            fp.write("\n# Moved from the module settings by an update\n"
+                     f"[mysqld]\ninnodb_buffer_pool_size = {innodb}\n")
+        print(f"InnoDB buffer pool size {innodb} moved to mariadb/90-custom.cnf", file=sys.stderr)
+    agent.unset_env("MARIADB_INNODB_BUFFER_POOL_SIZE")
+
+current = {var: os.environ[var] for var in lemp.ENV_VARS if var in os.environ}
+for var, value in lemp.env_from_request(lemp.request_from_env(os.environ)).items():
+    if var in current and current[var] != value:
+        print(f"{var} {current[var]} changed to {value} to fit the current rules", file=sys.stderr)
+        agent.set_env(var, value)
