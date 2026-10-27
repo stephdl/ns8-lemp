@@ -20,7 +20,7 @@
   ],
   "docs": {
     "documentation_url": "https://github.com/stephdl/ns8-lemp#readme",
-    "bug_url": "https://github.com/stephdl/dev/issues",
+    "bug_url": "https://github.com/stephdl/ns8-lemp/issues",
     "code_url": "https://github.com/stephdl/ns8-lemp"
   },
   "source": "ghcr.io/stephdl/lemp"
