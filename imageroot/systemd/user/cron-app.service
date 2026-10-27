@@ -20,7 +20,7 @@ ExecStart=/usr/bin/podman run --conmon-pidfile %t/cron-app.pid \
     --pod-id-file %t/lemp.pod-id --replace -d --name cron-app \
     --volume app:/app:z \
     --volume %S/state/php/php.d:/etc/lemp/php.d:ro,z \
-    --volume %S/state/crontab:/etc/lemp/crontab:ro,Z \
+    --volume %S/state/crontab:/etc/lemp/crontab:ro,z \
     --env-file=%S/state/smarthost.env \
     --env-file=%S/state/discovery.env \
     --env-file=%S/state/secrets/db.env \
