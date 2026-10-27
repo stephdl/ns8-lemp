@@ -114,6 +114,51 @@ nginx ignores `.htaccess` files. Put the rules of an application in a file of `n
 | `RewriteRule ^old/(.*)$ /new/$1 [R=301,L]` | `rewrite ^/old/(.*)$ /new/$1 permanent;` |
 | `Require all denied` in a `private/` folder | `location ^~ /private/ { deny all; }` |
 | `RewriteRule ^article/([0-9]+)$ index.php?id=$1 [L]` | `location ~ ^/article/([0-9]+)$ { try_files $uri /index.php?id=$1; }` |
+| `php_value max_input_vars 5000` | not in nginx: `max_input_vars = 5000` in `php/php.d/90-custom.ini` |
+
+A `.htaccess` file can stay in the site: nginx never reads it and never serves it. WordPress and the frameworks
+that send every request to `index.php` need no rule, the preset does it.
+
+### nginx examples
+
+Each block below goes in a file of `nginx/custom.d/`. They were tested together on one instance.
+
+Ask for a password on a folder. Create the password file in the same directory, `editor` being the user name:
+
+    runagent -m lemp1
+    printf 'editor:%s\n' "$(podman exec -i php-fpm-app openssl passwd -apr1 -stdin <<<'<password>')" > nginx/custom.d/htpasswd
+
+    location ^~ /admin-area/ {
+        auth_basic "Restricted";
+        auth_basic_user_file /etc/nginx/lemp-custom.d/htpasswd;
+    }
+
+Allow one network only. The module trusts the client address that Traefik sends, so the real address is checked:
+
+    location ^~ /intranet/ {
+        allow 192.168.1.0/24;
+        deny all;
+    }
+
+Keep the static files one month in the browser cache. The `wordpress` preset already does it:
+
+    location ~* \.(?:css|js|png|jpe?g|gif|svg|webp|woff2?)$ {
+        expires 30d;
+        access_log off;
+    }
+
+Compress text answers, and add security headers to every answer:
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header X-Content-Type-Options nosniff always;
+
+A `location` that sets its own `add_header` loses the headers set outside it: repeat them inside.
+
+Answer a fixed text on one path, for a monitoring probe:
+
+    location = /health { return 200 "ok\n"; }
 
 Edit the files from the module environment:
 
@@ -169,6 +214,11 @@ Download the site with git, wget, curl, rsync, sftp, ftp or composer:
 A shell opened without `-u www-data` runs as root. Then give the files to `www-data` at the end:
 
     chown -R www-data:www-data /app
+
+The files belong to `www-data:www-data` (uid and gid 33): PHP-FPM and cron run as this user, and write the
+uploads, the cache and the updates. Keep files at `644` and folders at `755`, the default of the shell.
+nginx runs as another user, `nginx` (uid 101), and serves the static files itself, so it needs the read right
+for others: a static file at `600` answers 403. A secret that only PHP reads, like `wp-config.php`, can be `600`.
 
 A fresh instance has an `index.php` page and a `phpinfo.php` page. Delete them once the site is installed.
 `phpinfo.php` leaves out the Environment and Variables sections: they would show the database password
