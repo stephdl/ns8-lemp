@@ -93,7 +93,14 @@
           >
             <template slot="content">
               <div class="card-rows">
-                <div class="card-row">
+                <div v-if="loading.getConfiguration" class="card-row">
+                  <cv-skeleton-text
+                    :paragraph="true"
+                    :line-count="3"
+                    class="stack-table"
+                  ></cv-skeleton-text>
+                </div>
+                <div v-else class="card-row">
                   <table class="stack-table">
                     <tr v-for="item in stackRows" :key="item.name">
                       <td class="stack-label">{{ item.name }}</td>
@@ -764,13 +771,19 @@ export default {
 
 // same layout as the backup card next to it
 .stack-table {
+  width: 100%;
+  max-width: 16rem;
   margin: 0 auto;
 }
 
-.stack-label {
-  padding-right: $spacing-04;
+.stack-table td {
   padding-bottom: $spacing-03;
-  font-weight: bold;
   text-align: right;
+}
+
+.stack-table td.stack-label {
+  padding-right: $spacing-05;
+  font-weight: bold;
+  text-align: left;
 }
 </style>
