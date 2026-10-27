@@ -764,13 +764,19 @@ export default {
 
 // same layout as the backup card next to it
 .stack-table {
+  width: 100%;
+  max-width: 16rem;
   margin: 0 auto;
 }
 
-.stack-label {
-  padding-right: $spacing-04;
+.stack-table td {
   padding-bottom: $spacing-03;
-  font-weight: bold;
   text-align: right;
+}
+
+.stack-table td.stack-label {
+  padding-right: $spacing-05;
+  font-weight: bold;
+  text-align: left;
 }
 </style>
