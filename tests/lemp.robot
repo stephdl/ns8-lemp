@@ -14,6 +14,15 @@ ${MARIADB_ADMIN2}    Ns8,Lemp-Admin2
 ${BASE_CONFIG}       "host":"${TEST_HOST}","lets_encrypt":false,"document_root":"","nginx_preset":"generic","php_memory_limit":"256M","php_upload_max_filesize":"64M","php_max_execution_time":300,"php_timezone":"Europe/Paris","fpm_pm_max_children":5,"mariadb_innodb_buffer_pool_size":"128M","phpmyadmin_enabled":true,"db_name":"app","db_user":"app","user_domain":"","mail_from":""
 
 *** Keywords ***
+An invalid custom file is refused
+    [Arguments]    ${path}    ${content}
+    In the module    sh -c 'cp ${path} /tmp/custom.bak && printf "${content}\\n" > ${path}'
+    Configure    "php_version":"8.4","php_memory_limit":"300M"    rc_expected=1
+    The site answers
+    ${config} =    Run task    module/${module_id}/get-configuration    {}
+    Should Be Equal    ${config['php_memory_limit']}    256M
+    In the module    mv /tmp/custom.bak ${path}
+
 Login to cluster-admin
     New Page    https://${NODE_ADDR}/cluster-admin/
     Fill Text    text="Username"    ${ADMIN_USER}
@@ -180,6 +189,27 @@ Check an invalid custom file is refused without outage
     ${page} =    Fetch    /phpinfo.php
     Should Contain    ${page}    <tr><td class="e">memory_limit</td><td class="v">256M</td>
     In the module    mv nginx/custom.d/90-custom.conf.bak nginx/custom.d/90-custom.conf
+
+Check each invalid custom file is refused
+    [Template]    An invalid custom file is refused
+    php/fpm.d/90-custom.conf    [www]\\npm.bogus = 1
+    mariadb/90-custom.cnf    [mysqld]\\nbogus_option = 1
+    php/php.d/90-custom.ini    foo[ = 1
+
+Check the nginx, PHP-FPM and MariaDB custom files are applied
+    In the module    sh -c 'cp nginx/custom.d/90-custom.conf /tmp/n.bak && echo "add_header X-Lemp-Test custom;" > nginx/custom.d/90-custom.conf'
+    In the module    sh -c 'cp php/fpm.d/90-custom.conf /tmp/f.bak && printf "[www]\\npm.max_requests = 321\\n" > php/fpm.d/90-custom.conf'
+    In the module    sh -c 'cp mariadb/90-custom.cnf /tmp/m.bak && printf "[mysqld]\\nmax_connections = 77\\n" > mariadb/90-custom.cnf'
+    Configure    "php_version":"8.4"
+    Wait Until Keyword Succeeds    60 seconds    2 seconds    The site answers
+    ${headers} =    Execute Command    curl -sk -D - -o /dev/null --resolve ${TEST_HOST}:443:127.0.0.1 https://${TEST_HOST}/
+    Should Contain    ${headers}    x-lemp-test: custom
+    ${fpm} =    In the module    podman exec php-fpm-app sh -c 'php-fpm -tt 2>&1'
+    Should Match Regexp    ${fpm}    pm.max_requests = 321\\b
+    ${output}    ${rc} =    SQL as    admin    ${MARIADB_ADMIN}    SELECT @@max_connections;
+    Should Be Equal    ${output}    77
+    In the module    sh -c 'mv /tmp/n.bak nginx/custom.d/90-custom.conf && mv /tmp/f.bak php/fpm.d/90-custom.conf && mv /tmp/m.bak mariadb/90-custom.cnf'
+    Configure    "php_version":"8.4"
 
 Check a custom file is kept and applied
     In the module    sh -c 'echo "max_input_vars = 4321" > php/php.d/90-custom.ini'
