@@ -17,7 +17,7 @@ PHP 8.2, 8.3, 8.4 and 8.5 are available. Only the image of the selected version 
 The PHP image loads the same extensions as ns8-lamp (gd, intl, ldap, imagick, imap, apcu, memcached,
 mysqli, pdo_mysql, opcache, soap, sockets, xsl, zip and more). The build fails if one is missing.
 It also has composer, msmtp and the admin tools of ns8-lamp (vim, nano, git, wget, curl, zip, ftp,
-mariadb client).
+rsync, ssh, sftp, scp, mariadb client).
 
 ## Install
 
@@ -115,7 +115,7 @@ The site lives in the `app` volume, mounted on `/app` in the PHP containers:
 
     runagent -m lemp1 podman exec -ti php-fpm-app bash
 
-Download it with git, wget, curl, ftp or composer, then give the files to `www-data`:
+Download it with git, wget, curl, rsync, sftp, ftp or composer, then give the files to `www-data`:
 
     cd /app
     git clone https://example.org/my/site.git .

@@ -34,7 +34,9 @@ RUN apt-get update && \
         mariadb-client \
         msmtp \
         nano \
+        openssh-client \
         pwgen \
+        rsync \
         tree \
         unzip \
         vim \
