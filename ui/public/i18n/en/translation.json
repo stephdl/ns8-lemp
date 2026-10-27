@@ -107,7 +107,7 @@
     "fpm_pm_max_children_invalid": "Use a number between 1 and 500",
     "database": "Database",
     "database_info_title": "Site database",
-    "database_info_description": "The module creates this MariaDB database and user. PHP reads them in the LEMP_DB_HOST, LEMP_DB_PORT, LEMP_DB_NAME, LEMP_DB_USER and LEMP_DB_PASSWORD variables. The name and user cannot change after the first save.",
+    "database_info_description": "PHP reads them in the LEMP_DB_* variables. The name and user cannot change after the first save.",
     "db_name": "Database name",
     "db_name_helper": "Letters, digits and underscores",
     "db_name_invalid": "Use letters, digits and underscores, 64 characters at most",

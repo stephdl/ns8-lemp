@@ -107,7 +107,7 @@
     "fpm_pm_max_children_invalid": "استخدم رقماً بين 1 و 500",
     "database": "قاعدة البيانات",
     "database_info_title": "قاعدة بيانات الموقع",
-    "database_info_description": "تنشئ الوحدة قاعدة بيانات MariaDB هذه ومستخدمها. يقرؤها PHP في المتغيرات LEMP_DB_HOST و LEMP_DB_PORT و LEMP_DB_NAME و LEMP_DB_USER و LEMP_DB_PASSWORD. لا يمكن تغيير الاسم والمستخدم بعد أول حفظ.",
+    "database_info_description": "يقرؤها PHP في المتغيرات LEMP_DB_*. لا يمكن تغيير الاسم والمستخدم بعد أول حفظ.",
     "db_name": "اسم قاعدة البيانات",
     "db_name_helper": "حروف وأرقام وشرطات سفلية",
     "db_name_invalid": "استخدم حروفاً وأرقاماً وشرطات سفلية، 64 حرفاً على الأكثر",

@@ -107,7 +107,7 @@
     "fpm_pm_max_children_invalid": "Use um número entre 1 e 500",
     "database": "Base de dados",
     "database_info_title": "Base de dados do site",
-    "database_info_description": "O módulo cria esta base de dados e este utilizador MariaDB. O PHP lê-os nas variáveis LEMP_DB_HOST, LEMP_DB_PORT, LEMP_DB_NAME, LEMP_DB_USER e LEMP_DB_PASSWORD. O nome e o utilizador não mudam depois da primeira gravação.",
+    "database_info_description": "O PHP lê-os nas variáveis LEMP_DB_*. O nome e o utilizador não podem mudar após a primeira gravação.",
     "db_name": "Nome da base",
     "db_name_helper": "Letras, algarismos e sublinhados",
     "db_name_invalid": "Use letras, algarismos e sublinhados, 64 caracteres no máximo",
