@@ -279,6 +279,7 @@
                   <h4 class="mg-bottom-md mg-top">
                     {{ $t("settings.php_tuning") }}
                   </h4>
+                  <!-- NsSlider reads invalidMessage only when it renders: the key re-renders it on a new error -->
                   <NsSlider
                     :label="$t('settings.php_memory_limit')"
                     min="128"
@@ -289,6 +290,7 @@
                     v-model="phpMemoryLimitMib"
                     :unitLabel="$t('settings.unit_mib')"
                     :invalidMessage="$t(error.php_memory_limit)"
+                    :key="'php_memory_limit-' + error.php_memory_limit"
                     :disabled="stillLoading"
                     class="mg-bottom"
                     ref="php_memory_limit"
@@ -303,6 +305,9 @@
                     v-model="phpUploadMaxFilesizeMib"
                     :unitLabel="$t('settings.unit_mib')"
                     :invalidMessage="$t(error.php_upload_max_filesize)"
+                    :key="
+                      'php_upload_max_filesize-' + error.php_upload_max_filesize
+                    "
                     :disabled="stillLoading"
                     class="mg-bottom"
                     ref="php_upload_max_filesize"
@@ -322,6 +327,9 @@
                     :limitedLabel="$t('settings.limited')"
                     @unlimited="isExecutionTimeUnlimited = $event"
                     :invalidMessage="$t(error.php_max_execution_time)"
+                    :key="
+                      'php_max_execution_time-' + error.php_max_execution_time
+                    "
                     :disabled="stillLoading"
                     class="mg-bottom"
                     ref="php_max_execution_time"
@@ -347,6 +355,7 @@
                     maxLabel=""
                     v-model="fpmPmMaxChildren"
                     :invalidMessage="$t(error.fpm_pm_max_children)"
+                    :key="'fpm_pm_max_children-' + error.fpm_pm_max_children"
                     :disabled="stillLoading"
                     class="mg-bottom"
                     ref="fpm_pm_max_children"
