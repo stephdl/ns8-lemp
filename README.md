@@ -1,171 +1,179 @@
-# ns8-kickstart
+# ns8-lemp
 
-This is a template module for [NethServer 8](https://github.com/NethServer/ns8-core).
-To start a new module from it:
+Host one PHP web site on NethServer 8 with nginx, PHP-FPM, MariaDB and phpMyAdmin.
+Each instance serves one host name and owns one site database.
 
-1. Click on [Use this template](https://github.com/NethServer/ns8-kickstart/generate).
-   Name your repo with `ns8-` prefix (e.g. `ns8-mymodule`). 
-   Do not end your module name with a number, like ~~`ns8-baaad2`~~!
+The pod runs these containers:
 
-1. Clone the repository, enter the cloned directory and
-   [configure your GIT identity](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup#_your_identity)
+| Container | Image | Role |
+|---|---|---|
+| `nginx-app` | `docker.io/nginx:1.30.6` | web server, listens on the module TCP port behind Traefik |
+| `php-fpm-app` | `ghcr.io/stephdl/lemp-php8.x` | PHP-FPM of the selected version, built from `docker.io/php:8.x-fpm-trixie` |
+| `cron-app` | same image as `php-fpm-app` | runs the site cron jobs |
+| `mariadb-app` | `docker.io/mariadb:12.3.3` | MariaDB LTS, supported until June 2029 |
+| `phpmyadmin-app` | `docker.io/phpmyadmin:5.2.3-fpm` | phpMyAdmin on `/phpmyadmin/`, enabled by default |
 
-1. Rename some references inside the repo:
-   ```
-   modulename=$(basename $(pwd) | sed 's/^ns8-//') &&
-   git mv imageroot/systemd/user/kickstart.service imageroot/systemd/user/${modulename}.service &&
-   git mv imageroot/systemd/user/kickstart-app.service imageroot/systemd/user/${modulename}-app.service && 
-   git mv tests/kickstart.robot tests/${modulename}.robot &&
-   sed -i "s/kickstart/${modulename}/g" $(find .github/ * -type f) &&
-   git commit -a -m "Repository initialization"
-   ```
-
-1. Edit this `README.md` file, by replacing this section with your module
-   description
-
-1. Adjust `.github/workflows` to your needs. `clean-registry.yml` might
-   need the proper list of image names to work correctly. Unused workflows
-   can be disabled from the GitHub Actions interface.
-
-1. Commit and push your local changes
+PHP 8.2, 8.3, 8.4 and 8.5 are available. Only the image of the selected version is pulled on the node.
+The PHP image has the same extensions as ns8-lamp (gd, intl, ldap, imagick, imap, apcu, memcached,
+mysqli, pdo_mysql, opcache, soap, zip and more), composer, msmtp and the admin tools of ns8-lamp
+(vim, nano, git, wget, curl, zip, ftp, mariadb client).
 
 ## Install
 
-Instantiate the module with:
+    add-module ghcr.io/stephdl/lemp:latest 1
 
-    add-module ghcr.io/nethserver/kickstart:latest 1
-
-The output of the command will return the instance name.
-Output example:
-
-    {"module_id": "kickstart1", "image_name": "kickstart", "image_url": "ghcr.io/nethserver/kickstart:latest"}
+The output gives the instance name, for example `lemp1`.
 
 ## Configure
 
-Let's assume that the mattermost instance is named `kickstart1`.
+Use the Settings page, or `configure-module`. Feed the JSON from stdin, so the passwords stay out of the shell history:
 
-Launch `configure-module`, by setting the following parameters:
-- `host`: a fully qualified domain name for the application
-- `http2https`: enable or disable HTTP to HTTPS redirection (true/false)
-- `lets_encrypt`: enable or disable Let's Encrypt certificate (true/false)
+    api-cli run module/lemp1/configure-module --data - <<'EOF'
+    {
+      "host": "www.example.org",
+      "lets_encrypt": false,
+      "php_version": "8.4",
+      "document_root": "",
+      "nginx_preset": "generic",
+      "php_memory_limit": "512M",
+      "php_upload_max_filesize": "100M",
+      "php_max_execution_time": 600,
+      "php_timezone": "Europe/Paris",
+      "fpm_pm_max_children": 10,
+      "mariadb_innodb_buffer_pool_size": "256M",
+      "phpmyadmin_enabled": true,
+      "db_name": "app",
+      "db_user": "app",
+      "db_password": "<site database password>",
+      "admin_password": "<MariaDB admin password>",
+      "user_domain": "",
+      "mail_from": ""
+    }
+    EOF
 
+`db_password` and `admin_password` are required at the first configuration. Later, omit them to keep the current ones.
+They need 8 characters with a lowercase letter, an uppercase letter, a digit and a symbol, like in the UI.
+`db_name` and `db_user` cannot change after the first configuration.
 
-Example:
+HTTPS is always forced on the route.
 
-```
-api-cli run configure-module --agent module/kickstart1 --data - <<EOF
-{
-  "host": "kickstart.domain.com",
-  "http2https": true,
-  "lets_encrypt": false
-}
-EOF
-```
+### nginx presets
 
-The above command will:
-- start and configure the kickstart instance
-- configure a virtual host for trafik to access the instance
+nginx ignores `.htaccess` files. `nginx_preset` gives the rewrite rules:
 
-## Get the configuration
-You can retrieve the configuration with
+- `generic`: every unknown path goes to `index.php`, which fits most PHP frameworks.
+- `wordpress`: the same, plus WordPress hardening. `xmlrpc.php` is denied, and PHP files under `wp-content/uploads/` never run.
 
-```
-api-cli run get-configuration --agent module/kickstart1
-```
+In both presets, hidden files (`.htaccess`, `.git`, `.env`) are never served.
+
+`document_root` is a subdirectory of `/app`, for example `public` for Laravel or Symfony.
+
+## Database
+
+The module creates the site database and its user. PHP reads them in these environment variables:
+
+    LEMP_DB_HOST  LEMP_DB_PORT  LEMP_DB_NAME  LEMP_DB_USER  LEMP_DB_PASSWORD
+
+The `admin` account has all rights on every database, with grant option. Use it in phpMyAdmin at
+`https://<host>/phpmyadmin/` to create other databases or users.
+
+The MariaDB `root` account accepts connections only from inside the `mariadb-app` container.
+The module scripts use it for the dumps and the account changes.
+
+## Customize
+
+Each service has custom files in the module state directory. The module creates them once and never overwrites them.
+They are loaded after the module settings, so they win.
+
+| File | Service |
+|---|---|
+| `nginx/custom.d/*.conf` | nginx directives, included in the `server` block |
+| `php/php.d/90-custom.ini` | PHP settings |
+| `php/fpm.d/90-custom.conf` | PHP-FPM pool, start the file with `[www]` |
+| `mariadb/90-custom.cnf` | MariaDB settings, start the file with `[mysqld]` |
+| `crontab` | cron jobs, in `/etc/cron.d` format with a user field |
+
+Edit them from the module environment:
+
+    runagent -m lemp1
+    vi nginx/custom.d/90-custom.conf
+
+Then save the Settings page, or run `configure-module` again. The module tests nginx, PHP-FPM, PHP and MariaDB
+with the new files before the restart. A broken file stops the action with the error in the task log,
+and the running site keeps its current configuration.
+
+A cron job example, run every 5 minutes:
+
+    */5 * * * * www-data php /app/cron.php
+
+The cron jobs see the `LEMP_*` variables too.
+
+## Deploy a site
+
+The site lives in the `app` volume, mounted on `/app` in the PHP containers:
+
+    runagent -m lemp1 podman exec -ti php-fpm-app bash
+
+Download it with git, wget, curl, ftp or composer, then give the files to `www-data`:
+
+    cd /app
+    git clone https://example.org/my/site.git .
+    chown -R www-data:www-data /app
+
+A fresh instance has an `index.php` page and a `phpinfo.php` page. Delete them once the site is installed.
+
+### WordPress example
+
+    runagent -m lemp1 podman exec -ti php-fpm-app bash
+    cd /app && rm -f index.php phpinfo.php
+    curl -sL https://wordpress.org/latest.tar.gz | tar xz --strip-components=1
+    chown -R www-data:www-data /app
+
+Set `nginx_preset` to `wordpress`, then open the site and use the database name, user and password of the module,
+with `127.0.0.1` as the database host.
+
+## Mail
+
+PHP `mail()` sends through the cluster smarthost with msmtp, when the smarthost is enabled.
+The sender is `mail_from`, or `noreply@<host>` when it is empty. The SMTP EHLO name is the host name.
+
+## LDAP
+
+Set `user_domain` to give the bind credentials of a user domain to PHP, like ns8-lamp:
+
+    LEMP_LDAP_HOST  LEMP_LDAP_PORT  LEMP_LDAP_SCHEMA  LEMP_LDAP_BASE  LEMP_LDAP_USER  LEMP_LDAP_PASS
+
+The site must handle the LDAP login itself.
+
+## Backup, restore and clone
+
+The backup holds a dump of all databases, the `app` volume, the secrets and the custom files.
+The dump keeps the MariaDB accounts, so the passwords stay the same after a restore.
+
+A restore on a cluster without the user domain drops the LDAP variables with a warning.
+A clone keeps the host name of its source but gets no web route: set a new host name in Settings.
+
+## Volumes
+
+`app` and `mysql-data` can go on an additional disk (`org.nethserver.volumes`).
 
 ## Uninstall
 
-To uninstall the instance:
+    remove-module --no-preserve lemp1
 
-    remove-module --no-preserve kickstart1
-
-## Smarthost setting discovery
-
-Some configuration settings, like the smarthost setup, are not part of the
-`configure-module` action input: they are discovered by looking at some
-Redis keys.  To ensure the module is always up-to-date with the
-centralized [smarthost
-setup](https://nethserver.github.io/ns8-core/core/smarthost/) every time
-kickstart starts, the command `bin/discover-smarthost` runs and refreshes
-the `state/smarthost.env` file with fresh values from Redis.
-
-Furthermore if smarthost setup is changed when kickstart is already
-running, the event handler `events/smarthost-changed/10reload_services`
-restarts the main module service.
-
-See also the `systemd/user/kickstart.service` file.
-
-This setting discovery is just an example to understand how the module is
-expected to work: it can be rewritten or discarded completely.
-
-## Debug
-
-some CLI are needed to debug
-
-- The module runs under an agent that initiate a lot of environment variables (in /home/kickstart1/.config/state), it could be nice to verify them
-on the root terminal
-
-    `runagent -m kickstart1 env`
-
-- you can become runagent for testing scripts and initiate all environment variables
-  
-    `runagent -m kickstart1`
-
- the path become : 
-```
-    echo $PATH
-    /home/kickstart1/.config/bin:/usr/local/agent/pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/
-```
-
-- if you want to debug a container or see environment inside
- `runagent -m kickstart1`
- ```
-podman ps
-CONTAINER ID  IMAGE                                      COMMAND               CREATED        STATUS        PORTS                    NAMES
-d292c6ff28e9  localhost/podman-pause:4.6.1-1702418000                          9 minutes ago  Up 9 minutes  127.0.0.1:20015->80/tcp  80b8de25945f-infra
-d8df02bf6f4a  docker.io/library/mariadb:10.11.5          --character-set-s...  9 minutes ago  Up 9 minutes  127.0.0.1:20015->80/tcp  mariadb-app
-9e58e5bd676f  docker.io/library/nginx:stable-alpine3.17  nginx -g daemon o...  9 minutes ago  Up 9 minutes  127.0.0.1:20015->80/tcp  kickstart-app
-```
-
-you can see what environment variable is inside the container
-```
-podman exec  kickstart-app env
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-TERM=xterm
-PKG_RELEASE=1
-MARIADB_DB_HOST=127.0.0.1
-MARIADB_DB_NAME=kickstart
-MARIADB_IMAGE=docker.io/mariadb:10.11.5
-MARIADB_DB_TYPE=mysql
-container=podman
-NGINX_VERSION=1.24.0
-NJS_VERSION=0.7.12
-MARIADB_DB_USER=kickstart
-MARIADB_DB_PASSWORD=kickstart
-MARIADB_DB_PORT=3306
-HOME=/root
-```
-
-you can run a shell inside the container
-
-```
-podman exec -ti   kickstart-app sh
-/ # 
-```
 ## Testing
 
-Test the module using the `test-module.sh` script:
+Test the module with the `test-module.sh` script:
 
+    ./test-module.sh <NODE_ADDR> ghcr.io/stephdl/lemp:latest
 
-    ./test-module.sh <NODE_ADDR> ghcr.io/nethserver/kickstart:latest
+The tests use [Robot Framework](https://robotframework.org/). The CI runs them on a QEMU node after each image build.
 
-The tests are made using [Robot Framework](https://robotframework.org/)
+## Renovate
+
+Renovate tracks every image of `build-images.sh`. MariaDB stays on 12.3, nginx on the 1.30 stable branch,
+and each PHP image on its own minor version. A new PHP minor version is added by hand.
 
 ## UI translation
 
 Translated with [Weblate](https://hosted.weblate.org/projects/ns8/).
-
-To setup the translation process:
-
-- add [GitHub Weblate app](https://docs.weblate.org/en/latest/admin/continuous.html#github-setup) to your repository
-- add your repository to [hosted.weblate.org]((https://hosted.weblate.org) or ask a NethServer developer to add it to ns8 Weblate project
