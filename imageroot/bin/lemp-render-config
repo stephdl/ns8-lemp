@@ -45,6 +45,8 @@ pm.max_spare_servers = 3
 request_terminate_timeout = {int(max_execution_time) + 30}
 catch_workers_output = yes
 decorate_workers_output = no
+; nginx already logs each request with the real client address
+access.log = /dev/null
 env[LEMP_DB_HOST] = $LEMP_DB_HOST
 env[LEMP_DB_PORT] = $LEMP_DB_PORT
 env[LEMP_DB_NAME] = $LEMP_DB_NAME
