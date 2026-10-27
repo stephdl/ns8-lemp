@@ -156,6 +156,10 @@
     "mail_from_format": "Posta-helbide baliogabea",
     "custom_files": "Konfigurazio pertsonalizatua",
     "custom_files_title": "Fitxategi pertsonalizatuak",
-    "custom_files_description": "Gehitu zure ezarpenak fitxategi hauetan: nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf eta crontab. {instance}-ren state karpetan daude, moduluaren ezarpenen ondoren kargatzen dira, berrabiarazte bakoitzaren aurretik probatzen dira eta babeskopietan gordetzen dira."
+    "custom_files_description": "Gehitu zure ezarpenak fitxategi hauetan: nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf eta crontab. {instance}-ren state karpetan daude, moduluaren ezarpenen ondoren kargatzen dira, berrabiarazte bakoitzaren aurretik probatzen dira eta babeskopietan gordetzen dira.",
+    "advanced": "Aurreratua",
+    "web_server": "Web zerbitzaria",
+    "php_tuning": "PHP doikuntza",
+    "mariadb_tuning": "MariaDB doikuntza"
   }
 }

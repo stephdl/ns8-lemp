@@ -156,6 +156,10 @@
     "mail_from_format": "Ungültige E-Mail-Adresse",
     "custom_files": "Eigene Konfiguration",
     "custom_files_title": "Eigene Dateien",
-    "custom_files_description": "Fügen Sie eigene Einstellungen in diese Dateien ein: nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf und crontab. Sie liegen im state-Verzeichnis von {instance}, werden nach den Moduleinstellungen geladen, vor jedem Neustart geprüft und in Sicherungen aufbewahrt."
+    "custom_files_description": "Fügen Sie eigene Einstellungen in diese Dateien ein: nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf und crontab. Sie liegen im state-Verzeichnis von {instance}, werden nach den Moduleinstellungen geladen, vor jedem Neustart geprüft und in Sicherungen aufbewahrt.",
+    "advanced": "Erweitert",
+    "web_server": "Webserver",
+    "php_tuning": "PHP-Feinabstimmung",
+    "mariadb_tuning": "MariaDB-Feinabstimmung"
   }
 }

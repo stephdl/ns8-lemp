@@ -156,6 +156,10 @@
     "mail_from_format": "Indirizzo email non valido",
     "custom_files": "Configurazione personalizzata",
     "custom_files_title": "File personalizzati",
-    "custom_files_description": "Aggiungi le tue impostazioni in questi file: nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf e crontab. Si trovano nella cartella state di {instance}, vengono caricati dopo le impostazioni del modulo, verificati prima di ogni riavvio e inclusi nei backup."
+    "custom_files_description": "Aggiungi le tue impostazioni in questi file: nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf e crontab. Si trovano nella cartella state di {instance}, vengono caricati dopo le impostazioni del modulo, verificati prima di ogni riavvio e inclusi nei backup.",
+    "advanced": "Avanzate",
+    "web_server": "Server web",
+    "php_tuning": "Ottimizzazione PHP",
+    "mariadb_tuning": "Ottimizzazione MariaDB"
   }
 }

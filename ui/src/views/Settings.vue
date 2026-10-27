@@ -86,19 +86,6 @@
               "
               :showCloseButton="false"
             />
-            <NsComboBox
-              v-model="nginxPreset"
-              :title="$t('settings.nginx_preset')"
-              :label="$t('settings.choose_nginx_preset')"
-              :options="nginxPresetOptions"
-              :autoFilter="true"
-              :autoHighlight="true"
-              :invalid-message="$t(error.nginx_preset)"
-              :helper-text="$t('settings.nginx_preset_helper')"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="nginx_preset"
-            />
             <NsTextInput
               :label="$t('settings.document_root')"
               placeholder="public"
@@ -131,56 +118,6 @@
               :description="$t('settings.php_eol_description')"
               :showCloseButton="false"
             />
-            <NsTextInput
-              :label="$t('settings.php_memory_limit')"
-              placeholder="512M"
-              v-model.trim="phpMemoryLimit"
-              :helper-text="$t('settings.size_helper')"
-              :invalid-message="$t(error.php_memory_limit)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="php_memory_limit"
-            />
-            <NsTextInput
-              :label="$t('settings.php_upload_max_filesize')"
-              placeholder="100M"
-              v-model.trim="phpUploadMaxFilesize"
-              :helper-text="$t('settings.php_upload_max_filesize_helper')"
-              :invalid-message="$t(error.php_upload_max_filesize)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="php_upload_max_filesize"
-            />
-            <NsTextInput
-              :label="$t('settings.php_max_execution_time')"
-              placeholder="600"
-              v-model.trim="phpMaxExecutionTime"
-              :helper-text="$t('settings.php_max_execution_time_helper')"
-              :invalid-message="$t(error.php_max_execution_time)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="php_max_execution_time"
-            />
-            <NsTextInput
-              :label="$t('settings.php_timezone')"
-              placeholder="Europe/Paris"
-              v-model.trim="phpTimezone"
-              :invalid-message="$t(error.php_timezone)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="php_timezone"
-            />
-            <NsTextInput
-              :label="$t('settings.fpm_pm_max_children')"
-              placeholder="10"
-              v-model.trim="fpmPmMaxChildren"
-              :helper-text="$t('settings.fpm_pm_max_children_helper')"
-              :invalid-message="$t(error.fpm_pm_max_children)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="fpm_pm_max_children"
-            />
-
             <!-- database -->
             <h4 class="mg-bottom-md mg-top">{{ $t("settings.database") }}</h4>
             <NsInlineNotification
@@ -246,19 +183,6 @@
               @passwordValidation="onDbPasswordValidation"
               class="mg-bottom maxwidth"
             />
-            <NsTextInput
-              :label="$t('settings.mariadb_innodb_buffer_pool_size')"
-              placeholder="256M"
-              v-model.trim="mariadbInnodbBufferPoolSize"
-              :helper-text="
-                $t('settings.mariadb_innodb_buffer_pool_size_helper')
-              "
-              :invalid-message="$t(error.mariadb_innodb_buffer_pool_size)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="mariadb_innodb_buffer_pool_size"
-            />
-
             <!-- MariaDB administrator and phpMyAdmin -->
             <h4 class="mg-bottom-md mg-top">
               {{ $t("settings.admin_account") }}
@@ -325,54 +249,6 @@
               }}</template>
             </NsToggle>
 
-            <!-- user domain -->
-            <h4 class="mg-bottom-md mg-top">
-              {{ $t("settings.user_domain_title") }}
-            </h4>
-            <NsInlineNotification
-              v-if="!loading.getConfiguration && !userDomainOptions.length"
-              kind="info"
-              :title="$t('settings.no_user_domain_title')"
-              :description="$t('settings.no_user_domain_description')"
-              :actionLabel="$t('settings.go_to_domains')"
-              @action="goToDomains"
-              :showCloseButton="false"
-            />
-            <template v-else>
-              <NsToggle
-                value="ldapEnabled"
-                :label="$t('settings.ldap_credentials')"
-                v-model="isLdapEnabled"
-                :disabled="stillLoading"
-                class="mg-bottom"
-              >
-                <template #tooltip>
-                  {{ $t("settings.ldap_credentials_tooltip") }}
-                </template>
-                <template slot="text-left">{{
-                  $t("settings.disabled")
-                }}</template>
-                <template slot="text-right">{{
-                  $t("settings.enabled")
-                }}</template>
-              </NsToggle>
-              <NsComboBox
-                v-if="isLdapEnabled"
-                v-model="userDomain"
-                :title="$t('settings.user_domain')"
-                :label="$t('settings.choose_user_domain')"
-                :options="userDomainOptions"
-                :autoFilter="true"
-                :autoHighlight="true"
-                :invalid-message="$t(error.user_domain)"
-                :disabled="stillLoading"
-                class="mg-bottom maxwidth"
-                ref="user_domain"
-              />
-            </template>
-
-            <!-- mail -->
-            <h4 class="mg-bottom-md mg-top">{{ $t("settings.mail") }}</h4>
             <NsInlineNotification
               v-if="!loading.getConfiguration && !smarthost.enabled"
               kind="warning"
@@ -382,43 +258,182 @@
               @action="goToSmarthost"
               :showCloseButton="false"
             />
-            <NsInlineNotification
-              v-if="!loading.getConfiguration && smarthost.enabled"
-              kind="info"
-              :title="$t('settings.smarthost_enabled_title')"
-              :description="
-                $t('settings.smarthost_enabled_description', {
-                  host: smarthost.host,
-                })
-              "
-              :showCloseButton="false"
-            />
-            <NsTextInput
-              :label="$t('settings.mail_from')"
-              :placeholder="mailFromPlaceholder"
-              v-model.trim="mailFrom"
-              :helper-text="$t('settings.mail_from_helper')"
-              :invalid-message="$t(error.mail_from)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="mail_from"
-            />
+            <cv-accordion ref="accordion" class="maxwidth mg-bottom mg-top">
+              <cv-accordion-item :open="toggleAccordion[0]">
+                <template slot="title">{{ $t("settings.advanced") }}</template>
+                <template slot="content">
+                  <h4 class="mg-bottom-md">{{ $t("settings.web_server") }}</h4>
+                  <NsComboBox
+                    v-model="nginxPreset"
+                    :title="$t('settings.nginx_preset')"
+                    :label="$t('settings.choose_nginx_preset')"
+                    :options="nginxPresetOptions"
+                    :autoFilter="true"
+                    :autoHighlight="true"
+                    :invalid-message="$t(error.nginx_preset)"
+                    :helper-text="$t('settings.nginx_preset_helper')"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="nginx_preset"
+                  />
+                  <h4 class="mg-bottom-md mg-top">
+                    {{ $t("settings.php_tuning") }}
+                  </h4>
+                  <NsTextInput
+                    :label="$t('settings.php_memory_limit')"
+                    placeholder="512M"
+                    v-model.trim="phpMemoryLimit"
+                    :helper-text="$t('settings.size_helper')"
+                    :invalid-message="$t(error.php_memory_limit)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="php_memory_limit"
+                  />
+                  <NsTextInput
+                    :label="$t('settings.php_upload_max_filesize')"
+                    placeholder="100M"
+                    v-model.trim="phpUploadMaxFilesize"
+                    :helper-text="$t('settings.php_upload_max_filesize_helper')"
+                    :invalid-message="$t(error.php_upload_max_filesize)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="php_upload_max_filesize"
+                  />
+                  <NsTextInput
+                    :label="$t('settings.php_max_execution_time')"
+                    placeholder="600"
+                    v-model.trim="phpMaxExecutionTime"
+                    :helper-text="$t('settings.php_max_execution_time_helper')"
+                    :invalid-message="$t(error.php_max_execution_time)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="php_max_execution_time"
+                  />
+                  <NsTextInput
+                    :label="$t('settings.php_timezone')"
+                    placeholder="Europe/Paris"
+                    v-model.trim="phpTimezone"
+                    :invalid-message="$t(error.php_timezone)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="php_timezone"
+                  />
+                  <NsTextInput
+                    :label="$t('settings.fpm_pm_max_children')"
+                    placeholder="10"
+                    v-model.trim="fpmPmMaxChildren"
+                    :helper-text="$t('settings.fpm_pm_max_children_helper')"
+                    :invalid-message="$t(error.fpm_pm_max_children)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="fpm_pm_max_children"
+                  />
 
-            <!-- custom files -->
-            <h4 class="mg-bottom-md mg-top">
-              {{ $t("settings.custom_files") }}
-            </h4>
-            <NsInlineNotification
-              kind="info"
-              :title="$t('settings.custom_files_title')"
-              :description="
-                $t('settings.custom_files_description', {
-                  instance: instanceName,
-                })
-              "
-              :showCloseButton="false"
-            />
+                  <h4 class="mg-bottom-md mg-top">
+                    {{ $t("settings.mariadb_tuning") }}
+                  </h4>
+                  <NsTextInput
+                    :label="$t('settings.mariadb_innodb_buffer_pool_size')"
+                    placeholder="256M"
+                    v-model.trim="mariadbInnodbBufferPoolSize"
+                    :helper-text="
+                      $t('settings.mariadb_innodb_buffer_pool_size_helper')
+                    "
+                    :invalid-message="$t(error.mariadb_innodb_buffer_pool_size)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="mariadb_innodb_buffer_pool_size"
+                  />
 
+                  <!-- user domain -->
+                  <h4 class="mg-bottom-md mg-top">
+                    {{ $t("settings.user_domain_title") }}
+                  </h4>
+                  <NsInlineNotification
+                    v-if="
+                      !loading.getConfiguration && !userDomainOptions.length
+                    "
+                    kind="info"
+                    :title="$t('settings.no_user_domain_title')"
+                    :description="$t('settings.no_user_domain_description')"
+                    :actionLabel="$t('settings.go_to_domains')"
+                    @action="goToDomains"
+                    :showCloseButton="false"
+                  />
+                  <template v-else>
+                    <NsToggle
+                      value="ldapEnabled"
+                      :label="$t('settings.ldap_credentials')"
+                      v-model="isLdapEnabled"
+                      :disabled="stillLoading"
+                      class="mg-bottom"
+                    >
+                      <template #tooltip>
+                        {{ $t("settings.ldap_credentials_tooltip") }}
+                      </template>
+                      <template slot="text-left">{{
+                        $t("settings.disabled")
+                      }}</template>
+                      <template slot="text-right">{{
+                        $t("settings.enabled")
+                      }}</template>
+                    </NsToggle>
+                    <NsComboBox
+                      v-if="isLdapEnabled"
+                      v-model="userDomain"
+                      :title="$t('settings.user_domain')"
+                      :label="$t('settings.choose_user_domain')"
+                      :options="userDomainOptions"
+                      :autoFilter="true"
+                      :autoHighlight="true"
+                      :invalid-message="$t(error.user_domain)"
+                      :disabled="stillLoading"
+                      class="mg-bottom maxwidth"
+                      ref="user_domain"
+                    />
+                  </template>
+
+                  <!-- mail -->
+                  <h4 class="mg-bottom-md mg-top">{{ $t("settings.mail") }}</h4>
+                  <NsInlineNotification
+                    v-if="!loading.getConfiguration && smarthost.enabled"
+                    kind="info"
+                    :title="$t('settings.smarthost_enabled_title')"
+                    :description="
+                      $t('settings.smarthost_enabled_description', {
+                        host: smarthost.host,
+                      })
+                    "
+                    :showCloseButton="false"
+                  />
+                  <NsTextInput
+                    :label="$t('settings.mail_from')"
+                    :placeholder="mailFromPlaceholder"
+                    v-model.trim="mailFrom"
+                    :helper-text="$t('settings.mail_from_helper')"
+                    :invalid-message="$t(error.mail_from)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="mail_from"
+                  />
+
+                  <!-- custom files -->
+                  <h4 class="mg-bottom-md mg-top">
+                    {{ $t("settings.custom_files") }}
+                  </h4>
+                  <NsInlineNotification
+                    kind="info"
+                    :title="$t('settings.custom_files_title')"
+                    :description="
+                      $t('settings.custom_files_description', {
+                        instance: instanceName,
+                      })
+                    "
+                    :showCloseButton="false"
+                  />
+                </template>
+              </cv-accordion-item>
+            </cv-accordion>
             <NsInlineNotification
               v-if="error.configureModule"
               kind="error"
@@ -478,6 +493,18 @@ import {
 const PHP_VERSIONS = ["8.5", "8.4", "8.3", "8.2"];
 const SIZE_PATTERN = /^[1-9][0-9]*[KMG]$/;
 const NAME_PATTERN = /^[A-Za-z0-9_]+$/;
+// fields shown in the Advanced section
+const ADVANCED_FIELDS = [
+  "nginx_preset",
+  "php_memory_limit",
+  "php_upload_max_filesize",
+  "php_max_execution_time",
+  "php_timezone",
+  "fpm_pm_max_children",
+  "mariadb_innodb_buffer_pool_size",
+  "user_domain",
+  "mail_from",
+];
 const RESERVED_USERS = ["root", "admin", "mysql", "mariadb.sys", "healthcheck"];
 
 export default {
@@ -500,6 +527,7 @@ export default {
       status: {},
       validationErrorDetails: [],
       urlCheckInterval: null,
+      toggleAccordion: [false],
       host: "",
       configuredHost: "",
       isLetsEncryptEnabled: false,
@@ -798,6 +826,9 @@ export default {
 
       const fail = (field, message, focus = true) => {
         this.error[field] = message;
+        if (ADVANCED_FIELDS.includes(field)) {
+          this.toggleAccordion = [true];
+        }
         if (isValidationOk && focus) {
           this.focusElement(field);
         }
@@ -906,6 +937,9 @@ export default {
             .filter((detail) => detail.trim() !== "");
         } else {
           this.error[param] = this.$t("settings." + validationError.error);
+          if (ADVANCED_FIELDS.includes(param)) {
+            this.toggleAccordion = [true];
+          }
           if (!focusAlreadySet) {
             if (param === "db_password") {
               this.focusDbPasswordField = { element: "newPassword" };
