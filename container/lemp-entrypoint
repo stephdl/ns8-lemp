@@ -22,12 +22,12 @@ if [[ "$1" == "cron" ]]; then
     done
     { echo "SHELL=/usr/local/bin/lemp-cron-shell"; cat /etc/lemp/crontab; } > /etc/cron.d/lemp
     chmod 0644 /etc/cron.d/lemp
-    # cron mails the job output, and there is no MTA here. The jobs write to this
-    # pipe instead, and cat copies it to the container output, so to the journal.
+    rm -f /run/lemp-cron.pipe
+    mkfifo -m 0620 /run/lemp-cron.pipe
+    chgrp www-data /run/lemp-cron.pipe
     # Opened read-write, so cat never sees an end of file between two jobs.
-    rm -f /run/lemp-cron.log
-    mkfifo -m 0622 /run/lemp-cron.log
-    cat 0<> /run/lemp-cron.log &
+    # Restarted if it dies, otherwise every job blocks on opening the pipe.
+    while :; do cat 0<> /run/lemp-cron.pipe; done &
 fi
 
 rm -f /etc/msmtprc
