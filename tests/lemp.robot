@@ -10,6 +10,7 @@ ${TEST_HOST}         lemp.ns8-ci.test
 ${DB_PASSWORD}       Ns8,Lemp-Db1
 ${DB_PASSWORD2}      Ns8,Lemp-Db2
 ${MARIADB_ADMIN}     Ns8,Lemp-Admin1
+${MARIADB_ADMIN2}    Ns8,Lemp-Admin2
 ${BASE_CONFIG}       "host":"${TEST_HOST}","lets_encrypt":false,"document_root":"","nginx_preset":"generic","php_memory_limit":"256M","php_upload_max_filesize":"64M","php_max_execution_time":300,"php_timezone":"Europe/Paris","fpm_pm_max_children":5,"mariadb_innodb_buffer_pool_size":"128M","phpmyadmin_enabled":true,"db_name":"app","db_user":"app","user_domain":"","mail_from":""
 
 *** Keywords ***
@@ -25,7 +26,17 @@ Configure
     [Arguments]    ${extra}    ${rc_expected}=0
     ${output} =    Run task    module/${module_id}/configure-module    {${BASE_CONFIG},${extra}}
     ...    decode_json=${FALSE}    rc_expected=${rc_expected}
+    IF    ${rc_expected} == 0    The configuration is    {${BASE_CONFIG},${extra}}
     RETURN    ${output}
+
+The configuration is
+    [Documentation]    get-configuration returns every value sent, passwords aside
+    [Arguments]    ${payload}
+    ${sent} =    Evaluate    {k: v for k, v in json.loads($payload).items() if not k.endswith("_password")}    modules=json
+    ${config} =    Run task    module/${module_id}/get-configuration    {}
+    FOR    ${key}    IN    @{sent}
+        Should Be Equal    ${config['${key}']}    ${sent['${key}']}    get-configuration ${key}
+    END
 
 Fetch
     [Arguments]    ${path}
@@ -193,6 +204,72 @@ Check the backup dump
     ${output} =    In the module    sh -c 'grep -c "CREATE DATABASE.*\\`app\\`" lemp.sql'
     Should Be Equal    ${output}    1
     In the module    module-cleanup-state
+
+Check the PHP settings change
+    Configure    "php_version":"8.4","php_memory_limit":"384M","php_upload_max_filesize":"32M","php_max_execution_time":120,"php_timezone":"UTC"
+    Wait Until Keyword Succeeds    60 seconds    2 seconds    The site answers
+    ${page} =    Fetch    /phpinfo.php
+    Should Contain    ${page}    <tr><td class="e">memory_limit</td><td class="v">384M</td>
+    Should Contain    ${page}    <tr><td class="e">upload_max_filesize</td><td class="v">32M</td>
+    Should Contain    ${page}    <tr><td class="e">post_max_size</td><td class="v">32M</td>
+    Should Contain    ${page}    <tr><td class="e">max_execution_time</td><td class="v">120</td>
+    Should Contain    ${page}    <tr><td class="e">date.timezone</td><td class="v">UTC</td>
+    # nginx takes the same upload limit and timeout
+    ${nginx} =    In the module    podman exec nginx-app nginx -T
+    Should Contain    ${nginx}    client_max_body_size 32M;
+    Should Contain    ${nginx}    fastcgi_read_timeout 120s;
+
+Check the PHP-FPM workers change
+    Configure    "php_version":"8.4","fpm_pm_max_children":7
+    ${fpm} =    In the module    podman exec php-fpm-app sh -c 'php-fpm -tt 2>&1'
+    Should Match Regexp    ${fpm}    pm.max_children = 7\\b
+
+Check the InnoDB buffer pool changes
+    Configure    "php_version":"8.4","mariadb_innodb_buffer_pool_size":"192M"
+    ${output}    ${rc} =    SQL as    admin    ${MARIADB_ADMIN}    SELECT @@innodb_buffer_pool_size;
+    Should Be Equal As Integers    ${rc}    0
+    Should Be Equal    ${output}    201326592
+
+Check the document root changes
+    In the module    podman exec -u www-data php-fpm-app sh -c 'mkdir -p /app/public && echo "<?php echo \\"docroot=public\\";" > /app/public/index.php'
+    Configure    "php_version":"8.4","document_root":"public"
+    Wait Until Keyword Succeeds    60 seconds    2 seconds    The site answers
+    ${page} =    Fetch    /
+    Should Be Equal    ${page}    docroot=public
+    Configure    "php_version":"8.4"
+    ${page} =    Fetch    /
+    Should Contain    ${page}    NS8 LEMP is running
+
+Check the sender address changes
+    Configure    "php_version":"8.4","mail_from":"web@example.org"
+    ${output} =    In the module    podman exec php-fpm-app printenv MAIL_FROM
+    Should Be Equal    ${output}    web@example.org
+    ${output} =    In the module    podman exec cron-app grep -c web@example.org /etc/lemp/cron.env
+    Should Be Equal    ${output}    1
+    Configure    "php_version":"8.4"
+
+Check the admin password can change
+    Configure    "php_version":"8.4","admin_password":"${MARIADB_ADMIN2}"
+    ${output}    ${rc} =    SQL as    admin    ${MARIADB_ADMIN2}    SELECT 1;
+    Should Be Equal As Integers    ${rc}    0
+    ${output}    ${rc} =    SQL as    admin    ${MARIADB_ADMIN}    SELECT 1;
+    Should Not Be Equal As Integers    ${rc}    0
+    Configure    "php_version":"8.4","admin_password":"${MARIADB_ADMIN}"
+
+Check an unknown user domain is rejected
+    ${output} =    Configure    "php_version":"8.4","user_domain":"missing.test"    rc_expected=2
+    Should Contain    ${output}    user_domain_not_found
+
+Check the host name changes
+    Configure    "php_version":"8.4","host":"lemp2.ns8-ci.test"
+    ${code} =    Execute Command    curl -sk -o /dev/null -w "\%{http_code}" --resolve lemp2.ns8-ci.test:443:127.0.0.1 https://lemp2.ns8-ci.test/
+    Should Be Equal    ${code}    200
+    ${code} =    HTTP code    /
+    Should Be Equal    ${code}    404
+    ${output} =    In the module    podman exec php-fpm-app printenv NS8_HOSTNAME
+    Should Be Equal    ${output}    lemp2.ns8-ci.test
+    Configure    "php_version":"8.4"
+    Wait Until Keyword Succeeds    60 seconds    2 seconds    The site answers
 
 Check PHP 8.2
     Check PHP version    8.2
