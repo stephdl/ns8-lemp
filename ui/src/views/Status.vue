@@ -94,12 +94,12 @@
             <template slot="content">
               <div class="card-rows">
                 <div class="card-row">
-                  <span class="label">nginx</span>
-                  <span>{{ versions.nginx || "-" }}</span>
-                </div>
-                <div class="card-row">
-                  <span class="label">MariaDB</span>
-                  <span>{{ versions.mariadb || "-" }}</span>
+                  <table class="stack-table">
+                    <tr v-for="item in stackRows" :key="item.name">
+                      <td class="stack-label">{{ item.name }}</td>
+                      <td>{{ item.version || "-" }}</td>
+                    </tr>
+                  </table>
                 </div>
                 <div class="card-row">
                   <NsButton
@@ -468,6 +468,13 @@ export default {
     };
   },
   computed: {
+    stackRows() {
+      return [
+        { name: "nginx", version: this.versions.nginx },
+        { name: "MariaDB", version: this.versions.mariadb },
+        { name: "phpMyAdmin", version: this.versions.phpmyadmin },
+      ];
+    },
     ...mapState(["instanceName", "instanceLabel", "core", "appName"]),
     installationNodeTitle() {
       if (this.status && this.status.node) {
@@ -755,8 +762,15 @@ export default {
   max-width: 30vw;
 }
 
-.label {
+// same layout as the backup card next to it
+.stack-table {
+  margin: 0 auto;
+}
+
+.stack-label {
+  padding-right: $spacing-04;
+  padding-bottom: $spacing-03;
   font-weight: bold;
-  margin-right: $spacing-03;
+  text-align: right;
 }
 </style>
