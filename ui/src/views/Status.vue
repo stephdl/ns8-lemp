@@ -754,4 +754,9 @@ export default {
   word-wrap: break-word;
   max-width: 30vw;
 }
+
+.label {
+  font-weight: bold;
+  margin-right: $spacing-03;
+}
 </style>
