@@ -888,16 +888,18 @@ export default {
       ) {
         fail("db_user", "settings.db_user_invalid");
       }
-      for (const [prefix, active, validation, focusField] of [
+      for (const [prefix, active, password, validation, focusField] of [
         [
           "db",
           this.isDbPasswordActive,
+          this.dbPassword,
           this.dbPasswordValidation,
           "focusDbPasswordField",
         ],
         [
           "admin",
           this.isAdminPasswordActive,
+          this.adminPassword,
           this.adminPasswordValidation,
           "focusAdminPasswordField",
         ],
@@ -905,7 +907,14 @@ export default {
         if (!active) {
           continue;
         }
-        if (!this.isStrongPassword(validation)) {
+        if (!password) {
+          fail(
+            `${prefix}_password`,
+            `settings.${prefix}_password_required`,
+            false
+          );
+          this[focusField] = { element: "newPassword" };
+        } else if (!this.isStrongPassword(validation)) {
           fail(
             `${prefix}_password`,
             `settings.${prefix}_password_too_weak`,
