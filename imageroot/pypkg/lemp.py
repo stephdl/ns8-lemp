@@ -61,8 +61,10 @@ def normalize(request):
     # current rules: the Settings page can show them and configure-module accepts them
     request["php_upload_max_filesize"] = clamp_size(request["php_upload_max_filesize"], UPLOAD_MAX_FILESIZE_MIB)
     request["php_memory_limit"] = clamp_size(request["php_memory_limit"], MEMORY_LIMIT_MIB)
-    if not DOCUMENT_ROOT_PATTERN.match(request["document_root"]):
-        request["document_root"] = ""
+    # Drop "." segments saved by an older release, so ./public stays public.
+    # A ".." could point anywhere: serve /app rather than guess.
+    root = "/".join(s for s in request["document_root"].strip("/").split("/") if s != ".")
+    request["document_root"] = root if DOCUMENT_ROOT_PATTERN.fullmatch(root) else ""
     if not memory_fits_upload(request):
         upload = size_mib(request["php_upload_max_filesize"])
         request["php_memory_limit"] = clamp_size(f"{int(upload) * 2}M", MEMORY_LIMIT_MIB)
