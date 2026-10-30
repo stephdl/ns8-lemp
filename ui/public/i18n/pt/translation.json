@@ -51,7 +51,8 @@
     "list-backup-repositories": "Listar os repositórios de cópia de segurança",
     "list-backups": "Listar as cópias de segurança",
     "list-installed-modules": "Listar os módulos instalados",
-    "restart-module": "Reiniciar o módulo"
+    "restart-module": "Reiniciar o módulo",
+    "reset-permissions": "Repor as permissões dos ficheiros"
   },
   "error": {
     "error": "Erro",
@@ -151,6 +152,10 @@
     "custom_files": "Configuração personalizada",
     "custom_files_title": "Ficheiros personalizados",
     "custom_files_description": "Adicione as suas definições nestes ficheiros: nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf e crontab. Estão na pasta state de {instance}, são carregados depois das definições do módulo, testados antes de cada reinício e guardados nas cópias de segurança.",
+    "file_permissions": "Permissões dos ficheiros",
+    "file_permissions_description": "Devolve os ficheiros do sítio a www-data, com 755 nas pastas e 644 nos ficheiros.",
+    "reset_permissions": "Repor permissões",
+    "reset_permissions_warning": "Todos os ficheiros e pastas em /app passam para www-data, com 755 nas pastas e 644 nos ficheiros. As permissões definidas à mão perdem-se.",
     "advanced": "Avançado",
     "web_server": "Servidor web",
     "php_tuning": "Ajustes do PHP",

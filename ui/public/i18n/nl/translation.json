@@ -51,7 +51,8 @@
     "list-backup-repositories": "Back-uprepository's weergeven",
     "list-backups": "Back-ups weergeven",
     "list-installed-modules": "Geïnstalleerde modules weergeven",
-    "restart-module": "Module herstarten"
+    "restart-module": "Module herstarten",
+    "reset-permissions": "Bestandsrechten herstellen"
   },
   "error": {
     "error": "Fout",
@@ -151,6 +152,10 @@
     "custom_files": "Aangepaste configuratie",
     "custom_files_title": "Aangepaste bestanden",
     "custom_files_description": "Voeg uw eigen instellingen toe in deze bestanden: nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf en crontab. Ze staan in de state-map van {instance}, worden na de module-instellingen geladen, voor elke herstart getest en in back-ups bewaard.",
+    "file_permissions": "Bestandsrechten",
+    "file_permissions_description": "Geeft de bestanden van de site terug aan www-data, met 755 op mappen en 644 op bestanden.",
+    "reset_permissions": "Rechten herstellen",
+    "reset_permissions_warning": "Alle bestanden en mappen onder /app krijgen www-data als eigenaar, 755 op mappen en 644 op bestanden. Met de hand ingestelde rechten gaan verloren.",
     "advanced": "Geavanceerd",
     "web_server": "Webserver",
     "php_tuning": "PHP-afstelling",

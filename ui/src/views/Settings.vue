@@ -447,6 +447,21 @@
                     "
                     :showCloseButton="false"
                   />
+                  <!-- file permissions -->
+                  <h4 class="mg-bottom-md mg-top">
+                    {{ $t("settings.file_permissions") }}
+                  </h4>
+                  <p class="mg-bottom">
+                    {{ $t("settings.file_permissions_description") }}
+                  </p>
+                  <NsButton
+                    type="button"
+                    kind="tertiary"
+                    :icon="Reset20"
+                    :disabled="stillLoading"
+                    @click="isShownResetPermissionsModal = true"
+                    >{{ $t("settings.reset_permissions") }}</NsButton
+                  >
                 </template>
               </cv-accordion-item>
             </cv-accordion>
@@ -492,6 +507,10 @@
         </cv-tile>
       </cv-column>
     </cv-row>
+    <ResetPermissionsModal
+      :visible="isShownResetPermissionsModal"
+      @hide="isShownResetPermissionsModal = false"
+    />
   </cv-grid>
 </template>
 
@@ -505,6 +524,8 @@ import {
   IconService,
   PageTitleService,
 } from "@nethserver/ns8-ui-lib";
+import ResetPermissionsModal from "@/components/ResetPermissionsModal.vue";
+import Reset20 from "@carbon/icons-vue/es/reset/20";
 
 const PHP_VERSIONS = ["8.5", "8.4", "8.3", "8.2"];
 // PHP size like 512M, 1G or 1536K, in whole MiB for the sliders
@@ -529,6 +550,7 @@ const RESERVED_USERS = ["root", "admin", "mysql", "mariadb.sys", "healthcheck"];
 
 export default {
   name: "Settings",
+  components: { ResetPermissionsModal },
   mixins: [
     TaskService,
     IconService,
@@ -541,6 +563,8 @@ export default {
   },
   data() {
     return {
+      Reset20,
+      isShownResetPermissionsModal: false,
       q: {
         page: "settings",
       },

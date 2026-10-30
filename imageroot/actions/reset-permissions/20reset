@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Give the site files back to www-data, readable by nginx
+
+set -e
+exec 1>&2
+
+if ! systemctl --user -q is-active php-fpm-app.service; then
+    echo "php-fpm-app is not running: start the application first"
+    exit 1
+fi
+
+# -h and find without -L never follow a symlink out of /app: the command runs as root
+podman exec php-fpm-app sh -c '
+    chown -R -h www-data:www-data /app &&
+    find /app -type d -exec chmod 755 {} + &&
+    find /app -type f -exec chmod 644 {} +
+'

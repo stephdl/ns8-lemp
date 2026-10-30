@@ -173,11 +173,13 @@ Never call `phpinfo()` without arguments on a public page.
 
 A static file at `600` answers 403: nginx cannot read it.
 
-A shell opened without `-u www-data` runs as root. To fix the owner and the modes of the whole site:
+A shell opened without `-u www-data` runs as root. To fix the owner and the modes of the whole site,
+use Reset permissions in Settings, under Advanced, or:
 
-    runagent -m lemp1 podman exec php-fpm-app sh -c 'chown -R www-data:www-data /app && find /app -type d -exec chmod 755 {} + && find /app -type f -exec chmod 644 {} +'
+    api-cli run module/lemp1/reset-permissions
 
-It also sets the secrets back to `644`: run `chmod 600` on them again.
+It sets the owner, `755` on folders and `644` on files, for all of `/app`.
+Run `chmod 600` again on the secrets you keep at `600`.
 
 ### WordPress
 

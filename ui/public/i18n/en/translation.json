@@ -51,7 +51,8 @@
     "list-backup-repositories": "List backup repositories",
     "list-backups": "List backups",
     "list-installed-modules": "List installed modules",
-    "restart-module": "Restart module"
+    "restart-module": "Restart module",
+    "reset-permissions": "Reset file permissions"
   },
   "error": {
     "error": "Error",
@@ -151,6 +152,10 @@
     "custom_files": "Custom configuration",
     "custom_files_title": "Custom files",
     "custom_files_description": "Add your own settings in these files: nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf and crontab. They are under the state directory of {instance}, loaded after the module settings, tested before each restart and kept in backups.",
+    "file_permissions": "File permissions",
+    "file_permissions_description": "Give the site files back to www-data, with 755 on folders and 644 on files.",
+    "reset_permissions": "Reset permissions",
+    "reset_permissions_warning": "Every file and folder under /app gets www-data as owner, 755 on folders and 644 on files. Custom modes set by hand are lost.",
     "advanced": "Advanced",
     "web_server": "Web server",
     "php_tuning": "PHP tuning",

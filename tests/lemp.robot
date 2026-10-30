@@ -224,6 +224,13 @@ Check a custom file is kept and applied
     ${custom} =    In the module    cat php/php.d/90-custom.ini
     Should Contain    ${custom}    max_input_vars = 4321
 
+Check the file permissions can be reset
+    In the module    podman exec php-fpm-app sh -c 'mkdir -p /app/perm && touch /app/perm/page.html && chmod 600 /app/perm/page.html && chmod 700 /app/perm && chown -R root:root /app/perm'
+    Run task    module/${module_id}/reset-permissions    {}
+    ${output} =    In the module    podman exec php-fpm-app stat -c '%U:%G %a %n' /app/perm /app/perm/page.html
+    Should Be Equal    ${output}    www-data:www-data 755 /app/perm\nwww-data:www-data 644 /app/perm/page.html
+    In the module    podman exec php-fpm-app rm -rf /app/perm
+
 Check the cron jobs run
     # A script file keeps the crontab line free of nested quotes
     In the module    podman exec php-fpm-app sh -c 'echo "<?php file_put_contents(\\"/app/cron.txt\\", getenv(\\"LEMP_DB_NAME\\"));" > /app/cronjob.php'

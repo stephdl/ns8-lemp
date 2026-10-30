@@ -51,7 +51,8 @@
     "list-backup-repositories": "Backup-Repositories auflisten",
     "list-backups": "Backups auflisten",
     "list-installed-modules": "Installierte Module auflisten",
-    "restart-module": "Modul neu starten"
+    "restart-module": "Modul neu starten",
+    "reset-permissions": "Dateiberechtigungen zurücksetzen"
   },
   "error": {
     "error": "Fehler",
@@ -151,6 +152,10 @@
     "custom_files": "Eigene Konfiguration",
     "custom_files_title": "Eigene Dateien",
     "custom_files_description": "Fügen Sie eigene Einstellungen in diese Dateien ein: nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf und crontab. Sie liegen im state-Verzeichnis von {instance}, werden nach den Moduleinstellungen geladen, vor jedem Neustart geprüft und in Sicherungen aufbewahrt.",
+    "file_permissions": "Dateiberechtigungen",
+    "file_permissions_description": "Gibt die Dateien der Website an www-data zurück, mit 755 für Ordner und 644 für Dateien.",
+    "reset_permissions": "Berechtigungen zurücksetzen",
+    "reset_permissions_warning": "Alle Dateien und Ordner unter /app gehören danach www-data, mit 755 für Ordner und 644 für Dateien. Von Hand gesetzte Rechte gehen verloren.",
     "advanced": "Erweitert",
     "web_server": "Webserver",
     "php_tuning": "PHP-Feinabstimmung",

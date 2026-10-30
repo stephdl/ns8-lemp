@@ -1,0 +1,10 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Reset file permissions",
+    "$id": "http://nethserver.org/json-schema/task/input/lemp/reset-permissions",
+    "description": "Set www-data as owner of the site files, 755 on folders and 644 on files",
+    "examples": [
+        {}
+    ],
+    "type": "object"
+}
