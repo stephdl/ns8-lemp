@@ -112,7 +112,7 @@ Check if lemp can be configured
     ${config} =    Run task    module/${module_id}/get-configuration    {}
     Should Be True    ${config['db_password_set']}
     Should Be True    ${config['admin_password_set']}
-    Should Match Regexp    ${config['phpmyadmin_path']}    ^phpmyadmin-[0-9a-f]{8}$
+    Should Match Regexp    ${config['phpmyadmin_path']}    ^[0-9a-f]{12}$
     Set Suite Variable    ${PMA_PATH}    /${config['phpmyadmin_path']}/
     Should Be Equal    ${config['versions']['mariadb']}    12.3.3
     Should Start With    ${config['versions']['php']}    8.4.

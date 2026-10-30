@@ -93,8 +93,9 @@ def request_from_env(env):
 
 
 def new_phpmyadmin_path():
-    # A random path keeps phpMyAdmin out of the bots that scan /phpmyadmin/
-    return "phpmyadmin-" + secrets.token_hex(4)
+    # A random path keeps phpMyAdmin out of the bots that scan /phpmyadmin/.
+    # No prefix: a path seen in a log or a screenshot does not tell what it serves.
+    return secrets.token_hex(6)
 
 
 def phpmyadmin_path(env):

@@ -121,7 +121,7 @@ The MariaDB `root` account works only inside `mariadb-app`. The module uses it f
 
 ## phpMyAdmin
 
-phpMyAdmin is served on a random path of the site, like `https://<host>/phpmyadmin-1a2b3c4d/`.
+phpMyAdmin is served on a random path of the site, like `https://<host>/07e1b87c3fa2/`.
 The Status page shows the link. Bots that scan `/phpmyadmin/` do not find it.
 
 The path changes each time phpMyAdmin is turned on in Settings, so a path that leaked stops working.
