@@ -119,7 +119,8 @@ else:
     }"""
 
 phpmyadmin_locations = ""
-if env["PHPMYADMIN_ENABLED"] == "True":
+# Same default as SETTINGS: a restored environment may lack the variable
+if env.get("PHPMYADMIN_ENABLED", "True") == "True":
     pma = lemp.phpmyadmin_path(env)
     phpmyadmin_locations = f"""
     location = /{pma} {{ return 301 /{pma}/; }}
