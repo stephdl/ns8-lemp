@@ -18,6 +18,7 @@ ExecStartPre=/usr/bin/touch %S/state/smarthost.env %S/state/discovery.env
 ExecStart=/usr/bin/podman run --conmon-pidfile %t/cron-app.pid \
     --cidfile %t/cron-app.ctr-id --cgroups=no-conmon \
     --pod-id-file %t/lemp.pod-id --replace -d --name cron-app \
+    --init \
     --volume app:/app:z \
     --volume %S/state/php/php.d:/etc/lemp/php.d:ro,z \
     --volume %S/state/crontab:/etc/lemp/crontab:ro,z \
