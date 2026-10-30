@@ -13,6 +13,9 @@ mv -v lemp.sql initdb.d
 # The MariaDB entrypoint sources this script after loading the dump: stop the temporary server and exit
 cat - >initdb.d/zz_lemp_restore.sh <<'EOS'
 mariadb --version
+# The dump brings the healthcheck accounts of the source, with another password
+# than .my-healthcheck.cnf written here: set them again to match the file
+create_healthcheck_users | docker_process_sql --database=mysql
 set -- true
 docker_temp_server_stop
 exit 0
