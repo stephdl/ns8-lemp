@@ -458,7 +458,7 @@
                     type="button"
                     kind="tertiary"
                     :icon="Reset20"
-                    :disabled="stillLoading"
+                    :disabled="stillLoading || !isDbPasswordSet"
                     @click="isShownResetPermissionsModal = true"
                     >{{ $t("settings.reset_permissions") }}</NsButton
                   >
