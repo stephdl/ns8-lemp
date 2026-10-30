@@ -906,7 +906,7 @@ export default {
         fail("nginx_preset", "common.required");
       }
       if (
-        !/^([A-Za-z0-9._-]*[A-Za-z0-9_-][A-Za-z0-9._-]*(\/[A-Za-z0-9._-]*[A-Za-z0-9_-][A-Za-z0-9._-]*)*)?$/.test(
+        !/^(?!(.*\/)?\.{1,2}(\/|$))([A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+)*)?$/.test(
           this.documentRoot.replace(/^\/+|\/+$/g, "")
         )
       ) {

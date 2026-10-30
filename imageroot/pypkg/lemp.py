@@ -6,6 +6,7 @@
 # The module settings in one place: configure, clone and restore all read this list
 
 import math
+import re
 import secrets
 
 # (configure-module field, environment variable, default, type)
@@ -34,6 +35,8 @@ MEMORY_LIMIT_MIB = (128, 4096)
 UPLOAD_MAX_FILESIZE_MIB = (2, 2048)
 MAX_EXECUTION_TIME = 3600
 FPM_MAX_CHILDREN = (1, 100)
+# Same pattern as configure-module: no . or .. segment, so nginx stays inside /app
+DOCUMENT_ROOT_PATTERN = re.compile(r"^(?!(.*/)?\.{1,2}(/|$))([A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*)?$")
 
 
 def size_mib(size):
@@ -57,6 +60,8 @@ def normalize(request):
     # current rules: the Settings page can show them and configure-module accepts them
     request["php_upload_max_filesize"] = clamp_size(request["php_upload_max_filesize"], UPLOAD_MAX_FILESIZE_MIB)
     request["php_memory_limit"] = clamp_size(request["php_memory_limit"], MEMORY_LIMIT_MIB)
+    if not DOCUMENT_ROOT_PATTERN.match(request["document_root"]):
+        request["document_root"] = ""
     if not memory_fits_upload(request):
         upload = size_mib(request["php_upload_max_filesize"])
         request["php_memory_limit"] = clamp_size(f"{int(upload) * 2}M", MEMORY_LIMIT_MIB)
