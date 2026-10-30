@@ -35,8 +35,9 @@ MEMORY_LIMIT_MIB = (128, 4096)
 UPLOAD_MAX_FILESIZE_MIB = (2, 2048)
 MAX_EXECUTION_TIME = 3600
 FPM_MAX_CHILDREN = (1, 100)
-# Same pattern as configure-module: no . or .. segment, so nginx stays inside /app
-DOCUMENT_ROOT_PATTERN = re.compile(r"^(?!(.*/)?\.{1,2}(/|$))([A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*)?$")
+# Same pattern as configure-module: no . or .. segment, so nginx stays inside /app.
+# No lookahead: the agent checks the schema with Go regexp, which has none.
+DOCUMENT_ROOT_PATTERN = re.compile(r"^(([A-Za-z0-9_-][A-Za-z0-9._-]*|\.[A-Za-z0-9_-][A-Za-z0-9._-]*|\.\.[A-Za-z0-9._-]+)(/([A-Za-z0-9_-][A-Za-z0-9._-]*|\.[A-Za-z0-9_-][A-Za-z0-9._-]*|\.\.[A-Za-z0-9._-]+))*)?$")
 
 
 def size_mib(size):
