@@ -10,14 +10,18 @@
 set -e
 exec 1>&2
 
-if ! systemctl --user -q is-active php-fpm-app.service; then
-    echo "php-fpm-app is not running: start the application first"
+if [[ -z "${PHP_IMAGE}" ]]; then
+    echo "The application is not configured yet"
     exit 1
 fi
 
-# -h and find without -L never follow a symlink out of /app: the command runs as root
-podman exec php-fpm-app sh -c '
-    chown -R -h www-data:www-data /app &&
-    find /app -type d -exec chmod 755 {} + &&
-    find /app -type f -exec chmod 644 {} +
-'
+# A throwaway container works on the volume even when php-fpm-app is stopped
+reset() {
+    podman run --rm --network=none --log-driver=none --volume app:/app:z --entrypoint= "$@"
+}
+
+# chown -h never follows a symlink out of /app
+reset --user root "${PHP_IMAGE}" chown -R -h www-data:www-data /app
+# chmod runs as www-data: a symlink swapped in by the site cannot reach a file of root.
+# X keeps the exec bit of scripts that already have one.
+reset --user www-data "${PHP_IMAGE}" chmod -R u=rwX,go=rX /app

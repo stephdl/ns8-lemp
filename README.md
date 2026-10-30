@@ -179,6 +179,7 @@ use Reset permissions in Settings, under Advanced, or:
     api-cli run module/lemp1/reset-permissions
 
 It sets the owner, `755` on folders and `644` on files, for all of `/app`.
+A file that was executable, like a script run by cron, gets `755`. It works even when the site is stopped.
 Run `chmod 600` again on the secrets you keep at `600`.
 
 ### WordPress

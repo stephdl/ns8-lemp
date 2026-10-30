@@ -225,10 +225,10 @@ Check a custom file is kept and applied
     Should Contain    ${custom}    max_input_vars = 4321
 
 Check the file permissions can be reset
-    In the module    podman exec php-fpm-app sh -c 'mkdir -p /app/perm && touch /app/perm/page.html && chmod 600 /app/perm/page.html && chmod 700 /app/perm && chown -R root:root /app/perm'
+    In the module    podman exec php-fpm-app sh -c 'mkdir -p /app/perm && touch /app/perm/page.html /app/perm/job.sh && chmod 600 /app/perm/page.html && chmod 700 /app/perm/job.sh /app/perm && chown -R root:root /app/perm'
     Run task    module/${module_id}/reset-permissions    {}
-    ${output} =    In the module    podman exec php-fpm-app stat -c '%U:%G %a %n' /app/perm /app/perm/page.html
-    Should Be Equal    ${output}    www-data:www-data 755 /app/perm\nwww-data:www-data 644 /app/perm/page.html
+    ${output} =    In the module    podman exec php-fpm-app stat -c '%U:%G %a %n' /app/perm /app/perm/page.html /app/perm/job.sh
+    Should Be Equal    ${output}    www-data:www-data 755 /app/perm\nwww-data:www-data 644 /app/perm/page.html\nwww-data:www-data 755 /app/perm/job.sh
     In the module    podman exec php-fpm-app rm -rf /app/perm
 
 Check the cron jobs run
