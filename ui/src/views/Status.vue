@@ -507,7 +507,9 @@ export default {
         { name: "nginx", version: this.versions.nginx },
         { name: "PHP", version: this.versions.php },
         { name: "MariaDB", version: this.versions.mariadb },
-        { name: "phpMyAdmin", version: this.versions.phpmyadmin },
+        ...(this.phpmyadminEnabled
+          ? [{ name: "phpMyAdmin", version: this.versions.phpmyadmin }]
+          : []),
       ];
     },
     ...mapState(["instanceName", "instanceLabel", "core", "appName"]),
