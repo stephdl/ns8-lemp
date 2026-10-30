@@ -97,8 +97,6 @@ Check the fresh configuration
     Should Not Be True    ${config['db_password_set']}
     Should Not Be True    ${config['admin_password_set']}
     Should Be True    ${config['phpmyadmin_enabled']}
-    Should Match Regexp    ${config['phpmyadmin_path']}    ^phpmyadmin-[0-9a-f]{8}$
-    Set Suite Variable    ${PMA_PATH}    /${config['phpmyadmin_path']}/
 
 Check missing passwords are rejected
     ${output} =    Configure    "php_version":"8.4"    rc_expected=2
@@ -114,6 +112,8 @@ Check if lemp can be configured
     ${config} =    Run task    module/${module_id}/get-configuration    {}
     Should Be True    ${config['db_password_set']}
     Should Be True    ${config['admin_password_set']}
+    Should Match Regexp    ${config['phpmyadmin_path']}    ^phpmyadmin-[0-9a-f]{8}$
+    Set Suite Variable    ${PMA_PATH}    /${config['phpmyadmin_path']}/
     Should Be Equal    ${config['versions']['mariadb']}    12.3.3
     Should Start With    ${config['versions']['php']}    8.4.
 
