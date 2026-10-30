@@ -130,7 +130,7 @@
     "admin_password_mismatch": "Les mots de passe ne correspondent pas",
     "admin_password_invalid": "Le mot de passe ne peut pas contenir de saut de ligne",
     "phpmyadmin": "phpMyAdmin",
-    "phpmyadmin_tooltip": "Servir phpMyAdmin sur un chemin aléatoire du site, affiché sur la page État",
+    "phpmyadmin_tooltip": "Servir phpMyAdmin sur un chemin aléatoire du site, affiché sur la page État. Le chemin change à chaque activation",
     "user_domain_title": "Domaine utilisateur",
     "no_user_domain_title": "Aucun domaine utilisateur",
     "no_user_domain_description": "Créez un domaine utilisateur pour donner ses identifiants LDAP au site.",

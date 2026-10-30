@@ -124,6 +124,9 @@ The MariaDB `root` account works only inside `mariadb-app`. The module uses it f
 phpMyAdmin is served on a random path of the site, like `https://<host>/phpmyadmin-1a2b3c4d/`.
 The Status page shows the link. Bots that scan `/phpmyadmin/` do not find it.
 
+The path changes each time phpMyAdmin is turned on in Settings, so a path that leaked stops working.
+Other changes, a clone, a move or a restore keep it.
+
 Read the path from the command line:
 
     api-cli run module/lemp1/get-configuration | jq -r .phpmyadmin_path
@@ -131,7 +134,7 @@ Read the path from the command line:
 To protect it more:
 
 - install [CrowdSec](https://github.com/NethServer/ns8-crowdsec) on the node, it bans the clients that scan the site;
-- disable phpMyAdmin in Settings when nobody uses it.
+- disable phpMyAdmin in Settings when nobody uses it, it gets a new path when you turn it back on.
 
 A failed phpMyAdmin login answers 200, so CrowdSec does not see a password guess on the login page.
 The random path and a strong `admin` password are the real protection.

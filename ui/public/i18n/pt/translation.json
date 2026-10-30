@@ -130,7 +130,7 @@
     "admin_password_mismatch": "As palavras-passe não coincidem",
     "admin_password_invalid": "A palavra-passe não pode conter uma quebra de linha",
     "phpmyadmin": "phpMyAdmin",
-    "phpmyadmin_tooltip": "Servir o phpMyAdmin num caminho aleatório do sítio, apresentado na página Estado",
+    "phpmyadmin_tooltip": "Servir o phpMyAdmin num caminho aleatório do sítio, apresentado na página Estado. O caminho muda a cada ativação",
     "user_domain_title": "Domínio de utilizadores",
     "no_user_domain_title": "Sem domínio de utilizadores",
     "no_user_domain_description": "Crie um domínio de utilizadores para dar as suas credenciais LDAP ao site.",

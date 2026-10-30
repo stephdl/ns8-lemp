@@ -130,7 +130,7 @@
     "admin_password_mismatch": "De wachtwoorden komen niet overeen",
     "admin_password_invalid": "Het wachtwoord mag geen regeleinde bevatten",
     "phpmyadmin": "phpMyAdmin",
-    "phpmyadmin_tooltip": "phpMyAdmin serveren op een willekeurig pad van de site, getoond op de statuspagina",
+    "phpmyadmin_tooltip": "phpMyAdmin serveren op een willekeurig pad van de site, getoond op de statuspagina. Het pad verandert bij elke inschakeling",
     "user_domain_title": "Gebruikersdomein",
     "no_user_domain_title": "Geen gebruikersdomein",
     "no_user_domain_description": "Maak een gebruikersdomein aan om de LDAP-gegevens ervan aan de website te geven.",

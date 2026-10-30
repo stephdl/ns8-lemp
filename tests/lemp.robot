@@ -168,7 +168,19 @@ Check phpMyAdmin can be disabled
     Wait Until Keyword Succeeds    60 seconds    2 seconds    The site answers
     ${page} =    Fetch    ${PMA_PATH}
     Should Not Contain    ${page}    pma_username
+
+Check phpMyAdmin gets a new path when turned on
     Configure    "php_version":"8.4"
+    ${config} =    Run task    module/${module_id}/get-configuration    {}
+    Should Not Be Equal    /${config['phpmyadmin_path']}/    ${PMA_PATH}
+    ${page} =    Fetch    ${PMA_PATH}
+    Should Not Contain    ${page}    pma_username
+    Set Suite Variable    ${PMA_PATH}    /${config['phpmyadmin_path']}/
+    ${page} =    Fetch    ${PMA_PATH}
+    Should Contain    ${page}    name="pma_username"
+    Configure    "php_version":"8.4"
+    ${config} =    Run task    module/${module_id}/get-configuration    {}
+    Should Be Equal    /${config['phpmyadmin_path']}/    ${PMA_PATH}
 
 Check the WordPress preset
     In the module    podman exec php-fpm-app sh -c 'printf "<?php echo \\"route=\\".\\$_SERVER[\\"REQUEST_URI\\"];" > /app/router.php'

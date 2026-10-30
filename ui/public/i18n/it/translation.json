@@ -130,7 +130,7 @@
     "admin_password_mismatch": "Le password non coincidono",
     "admin_password_invalid": "La password non può contenere un a capo",
     "phpmyadmin": "phpMyAdmin",
-    "phpmyadmin_tooltip": "Servi phpMyAdmin su un percorso casuale del sito, mostrato nella pagina Stato",
+    "phpmyadmin_tooltip": "Servi phpMyAdmin su un percorso casuale del sito, mostrato nella pagina Stato. Il percorso cambia a ogni attivazione",
     "user_domain_title": "Dominio utenti",
     "no_user_domain_title": "Nessun dominio utenti",
     "no_user_domain_description": "Crea un dominio utenti per dare le sue credenziali LDAP al sito.",
