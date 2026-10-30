@@ -14,6 +14,6 @@ request = json.load(sys.stdin)
 
 original_environment = request["environment"]
 
-for evar in lemp.ENV_VARS + ["DB_PASSWORD_SET", "ADMIN_PASSWORD_SET"]:
+for evar in lemp.ENV_VARS + ["DB_PASSWORD_SET", "ADMIN_PASSWORD_SET", "PHPMYADMIN_PATH"]:
     if evar in original_environment:
         agent.set_env(evar, original_environment[evar])

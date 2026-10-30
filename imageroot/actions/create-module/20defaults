@@ -6,5 +6,7 @@
 #
 
 import agent
+import lemp
 
 agent.set_env("PHPMYADMIN_ENABLED", "True")
+agent.set_env("PHPMYADMIN_PATH", lemp.new_phpmyadmin_path())

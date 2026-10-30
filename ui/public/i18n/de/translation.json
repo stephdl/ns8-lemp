@@ -129,7 +129,7 @@
     "admin_password_mismatch": "Die Passwörter stimmen nicht überein",
     "admin_password_invalid": "Das Passwort darf keinen Zeilenumbruch enthalten",
     "phpmyadmin": "phpMyAdmin",
-    "phpmyadmin_tooltip": "phpMyAdmin unter https://<host>/phpmyadmin/ bereitstellen",
+    "phpmyadmin_tooltip": "phpMyAdmin unter einem zufälligen Pfad der Website bereitstellen, angezeigt auf der Statusseite",
     "user_domain_title": "Benutzerdomäne",
     "no_user_domain_title": "Keine Benutzerdomäne",
     "no_user_domain_description": "Erstellen Sie eine Benutzerdomäne, um ihre LDAP-Zugangsdaten an die Website zu geben.",

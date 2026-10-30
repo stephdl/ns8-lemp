@@ -97,6 +97,8 @@ Check the fresh configuration
     Should Not Be True    ${config['db_password_set']}
     Should Not Be True    ${config['admin_password_set']}
     Should Be True    ${config['phpmyadmin_enabled']}
+    Should Match Regexp    ${config['phpmyadmin_path']}    ^phpmyadmin-[0-9a-f]{8}$
+    Set Suite Variable    ${PMA_PATH}    /${config['phpmyadmin_path']}/
 
 Check missing passwords are rejected
     ${output} =    Configure    "php_version":"8.4"    rc_expected=2
@@ -155,14 +157,16 @@ Check the database name cannot change
     ...    decode_json=${FALSE}    rc_expected=2
     Should Contain    ${output}    db_name_cannot_change
 
-Check phpMyAdmin is served
-    ${page} =    Fetch    /phpmyadmin/
+Check phpMyAdmin is served on its random path only
+    ${page} =    Fetch    ${PMA_PATH}
     Should Contain    ${page}    name="pma_username"
+    ${page} =    Fetch    /phpmyadmin/
+    Should Not Contain    ${page}    pma_username
 
 Check phpMyAdmin can be disabled
     Configure    "php_version":"8.4","phpmyadmin_enabled":false
     Wait Until Keyword Succeeds    60 seconds    2 seconds    The site answers
-    ${page} =    Fetch    /phpmyadmin/
+    ${page} =    Fetch    ${PMA_PATH}
     Should Not Contain    ${page}    pma_username
     Configure    "php_version":"8.4"
 

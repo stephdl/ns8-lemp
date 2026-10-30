@@ -12,7 +12,7 @@ Each instance serves one host name and owns one site database.
 | `php-fpm-app` | `ghcr.io/stephdl/lemp-php8.x` | PHP of the selected version |
 | `cron-app` | same image as `php-fpm-app` | cron jobs of the site |
 | `mariadb-app` | `docker.io/mariadb:12.3.3` | MariaDB LTS, supported until June 2029 |
-| `phpmyadmin-app` | `docker.io/phpmyadmin:5.2.3-fpm` | phpMyAdmin on `/phpmyadmin/` |
+| `phpmyadmin-app` | `docker.io/phpmyadmin:5.2.3-fpm` | phpMyAdmin on a random path, see [phpMyAdmin](#phpmyadmin) |
 
 PHP 8.2, 8.3, 8.4 and 8.5 are available. The node pulls only the selected version.
 
@@ -115,10 +115,26 @@ The module creates the site database and its user. PHP reads them in these varia
 
     LEMP_DB_HOST  LEMP_DB_PORT  LEMP_DB_NAME  LEMP_DB_USER  LEMP_DB_PASSWORD
 
-The `admin` account has all rights on every database. Use it in phpMyAdmin, at `https://<host>/phpmyadmin/`,
-to create other databases or users.
+The `admin` account has all rights on every database. Use it in phpMyAdmin to create other databases or users.
 
 The MariaDB `root` account works only inside `mariadb-app`. The module uses it for dumps and account changes.
+
+## phpMyAdmin
+
+phpMyAdmin is served on a random path of the site, like `https://<host>/phpmyadmin-1a2b3c4d/`.
+The Status page shows the link. Bots that scan `/phpmyadmin/` do not find it.
+
+Read the path from the command line:
+
+    api-cli run module/lemp1/get-configuration | jq -r .phpmyadmin_path
+
+To protect it more:
+
+- install [CrowdSec](https://github.com/NethServer/ns8-crowdsec) on the node, it bans the clients that scan the site;
+- disable phpMyAdmin in Settings when nobody uses it.
+
+A failed phpMyAdmin login answers 200, so CrowdSec does not see a password guess on the login page.
+The random path and a strong `admin` password are the real protection.
 
 ## Deploy a site
 
@@ -191,7 +207,7 @@ What works with the preset:
 - pretty permalinks;
 - WP-Cron and the Site Health loopback test, because the site reaches itself through Traefik;
 - mail, through the cluster smarthost;
-- phpMyAdmin, on `https://<host>/phpmyadmin/` with the `admin` account.
+- phpMyAdmin, with the `admin` account.
 
 WP-CLI lives in `/tmp`, so it goes away when the container restarts. Download it again to use it.
 

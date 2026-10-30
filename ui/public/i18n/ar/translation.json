@@ -129,7 +129,7 @@
     "admin_password_mismatch": "كلمتا المرور غير متطابقتين",
     "admin_password_invalid": "لا يمكن أن تحتوي كلمة المرور على سطر جديد",
     "phpmyadmin": "phpMyAdmin",
-    "phpmyadmin_tooltip": "تقديم phpMyAdmin على https://<host>/phpmyadmin/",
+    "phpmyadmin_tooltip": "تقديم phpMyAdmin على مسار عشوائي للموقع، يظهر في صفحة الحالة",
     "user_domain_title": "نطاق المستخدمين",
     "no_user_domain_title": "لا يوجد نطاق مستخدمين",
     "no_user_domain_description": "أنشئ نطاق مستخدمين لإعطاء بيانات اعتماد LDAP الخاصة به للموقع.",

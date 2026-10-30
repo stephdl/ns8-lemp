@@ -116,7 +116,7 @@
             title="phpMyAdmin"
             :description="
               phpmyadminEnabled
-                ? versions.phpmyadmin || '-'
+                ? `/${phpmyadminPath}/`
                 : $t('status.phpmyadmin_disabled')
             "
             :icon="Tools32"
@@ -471,6 +471,7 @@ export default {
       redirectTimeout: 0,
       host: "",
       phpmyadminEnabled: false,
+      phpmyadminPath: "",
       versions: {},
       status: {
         instance: "",
@@ -506,6 +507,7 @@ export default {
         { name: "nginx", version: this.versions.nginx },
         { name: "PHP", version: this.versions.php },
         { name: "MariaDB", version: this.versions.mariadb },
+        { name: "phpMyAdmin", version: this.versions.phpmyadmin },
       ];
     },
     ...mapState(["instanceName", "instanceLabel", "core", "appName"]),
@@ -569,7 +571,7 @@ export default {
       window.open(`https://${this.host}`, "_blank");
     },
     goToPhpmyadmin() {
-      window.open(`https://${this.host}/phpmyadmin/`, "_blank");
+      window.open(`https://${this.host}/${this.phpmyadminPath}/`, "_blank");
     },
     async getConfiguration() {
       this.loading.getConfiguration = true;
@@ -617,6 +619,7 @@ export default {
       const config = taskResult.output;
       this.host = config.host;
       this.phpmyadminEnabled = config.phpmyadmin_enabled;
+      this.phpmyadminPath = config.phpmyadmin_path;
       this.versions = config.versions;
       this.loading.getConfiguration = false;
     },

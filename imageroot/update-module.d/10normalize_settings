@@ -13,6 +13,10 @@ import sys
 import agent
 import lemp
 
+if not os.environ.get("PHPMYADMIN_PATH"):
+    agent.set_env("PHPMYADMIN_PATH", lemp.new_phpmyadmin_path())
+    print("phpMyAdmin moved to a random path, shown on the Status page", file=sys.stderr)
+
 # Nothing to fix before the first configuration
 if not os.environ.get("PHP_VERSION"):
     sys.exit(0)

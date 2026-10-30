@@ -129,7 +129,7 @@
     "admin_password_mismatch": "The passwords do not match",
     "admin_password_invalid": "The password cannot contain a line break",
     "phpmyadmin": "phpMyAdmin",
-    "phpmyadmin_tooltip": "Serve phpMyAdmin on https://<host>/phpmyadmin/",
+    "phpmyadmin_tooltip": "Serve phpMyAdmin on a random path of the site, shown on the Status page",
     "user_domain_title": "User domain",
     "no_user_domain_title": "No user domain",
     "no_user_domain_description": "Create a user domain to give its LDAP credentials to the site.",

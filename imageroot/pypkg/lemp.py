@@ -6,6 +6,7 @@
 # The module settings in one place: configure, clone and restore all read this list
 
 import math
+import secrets
 
 # (configure-module field, environment variable, default, type)
 SETTINGS = [
@@ -83,6 +84,16 @@ def request_from_env(env):
         else:
             request[field] = kind(value)
     return normalize(request)
+
+
+def new_phpmyadmin_path():
+    # A random path keeps phpMyAdmin out of the bots that scan /phpmyadmin/
+    return "phpmyadmin-" + secrets.token_hex(4)
+
+
+def phpmyadmin_path(env):
+    # An instance without a path predates the random one
+    return env.get("PHPMYADMIN_PATH") or "phpmyadmin"
 
 
 def php_image(image_url, version):

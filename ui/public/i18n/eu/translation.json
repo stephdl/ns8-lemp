@@ -129,7 +129,7 @@
     "admin_password_mismatch": "Pasahitzak ez datoz bat",
     "admin_password_invalid": "Pasahitzak ezin du lerro-jauzirik izan",
     "phpmyadmin": "phpMyAdmin",
-    "phpmyadmin_tooltip": "Zerbitzatu phpMyAdmin https://<ostalaria>/phpmyadmin/ helbidean",
+    "phpmyadmin_tooltip": "Zerbitzatu phpMyAdmin gunearen ausazko bide batean, Egoera orrian erakusten dena",
     "user_domain_title": "Erabiltzaile-domeinua",
     "no_user_domain_title": "Erabiltzaile-domeinurik ez",
     "no_user_domain_description": "Sortu erabiltzaile-domeinu bat haren LDAP kredentzialak webguneari emateko.",
