@@ -112,6 +112,8 @@ Check if lemp can be configured
     ${config} =    Run task    module/${module_id}/get-configuration    {}
     Should Be True    ${config['db_password_set']}
     Should Be True    ${config['admin_password_set']}
+    Should Match Regexp    ${config['phpmyadmin_path']}    ^[0-9a-f]{12}$
+    Set Suite Variable    ${PMA_PATH}    /${config['phpmyadmin_path']}/
     Should Be Equal    ${config['versions']['mariadb']}    12.3.3
     Should Start With    ${config['versions']['php']}    8.4.
 
@@ -155,16 +157,30 @@ Check the database name cannot change
     ...    decode_json=${FALSE}    rc_expected=2
     Should Contain    ${output}    db_name_cannot_change
 
-Check phpMyAdmin is served
-    ${page} =    Fetch    /phpmyadmin/
+Check phpMyAdmin is served on its random path only
+    ${page} =    Fetch    ${PMA_PATH}
     Should Contain    ${page}    name="pma_username"
+    ${page} =    Fetch    /phpmyadmin/
+    Should Not Contain    ${page}    pma_username
 
 Check phpMyAdmin can be disabled
     Configure    "php_version":"8.4","phpmyadmin_enabled":false
     Wait Until Keyword Succeeds    60 seconds    2 seconds    The site answers
-    ${page} =    Fetch    /phpmyadmin/
+    ${page} =    Fetch    ${PMA_PATH}
     Should Not Contain    ${page}    pma_username
+
+Check phpMyAdmin gets a new path when turned on
     Configure    "php_version":"8.4"
+    ${config} =    Run task    module/${module_id}/get-configuration    {}
+    Should Not Be Equal    /${config['phpmyadmin_path']}/    ${PMA_PATH}
+    ${page} =    Fetch    ${PMA_PATH}
+    Should Not Contain    ${page}    pma_username
+    Set Suite Variable    ${PMA_PATH}    /${config['phpmyadmin_path']}/
+    ${page} =    Fetch    ${PMA_PATH}
+    Should Contain    ${page}    name="pma_username"
+    Configure    "php_version":"8.4"
+    ${config} =    Run task    module/${module_id}/get-configuration    {}
+    Should Be Equal    /${config['phpmyadmin_path']}/    ${PMA_PATH}
 
 Check the WordPress preset
     In the module    podman exec php-fpm-app sh -c 'printf "<?php echo \\"route=\\".\\$_SERVER[\\"REQUEST_URI\\"];" > /app/router.php'
@@ -219,6 +235,13 @@ Check a custom file is kept and applied
     Should Contain    ${page}    <tr><td class="e">max_input_vars</td><td class="v">4321</td>
     ${custom} =    In the module    cat php/php.d/90-custom.ini
     Should Contain    ${custom}    max_input_vars = 4321
+
+Check the file permissions can be reset
+    In the module    podman exec php-fpm-app sh -c 'mkdir -p /app/perm && touch /app/perm/page.html /app/perm/job.sh && chmod 600 /app/perm/page.html && chmod 700 /app/perm/job.sh /app/perm && chown -R root:root /app/perm'
+    Run task    module/${module_id}/reset-permissions    {}
+    ${output} =    In the module    podman exec php-fpm-app stat -c '%U:%G %a %n' /app/perm /app/perm/page.html /app/perm/job.sh
+    Should Be Equal    ${output}    www-data:www-data 755 /app/perm\nwww-data:www-data 644 /app/perm/page.html\nwww-data:www-data 755 /app/perm/job.sh
+    In the module    podman exec php-fpm-app rm -rf /app/perm
 
 Check the cron jobs run
     # A script file keeps the crontab line free of nested quotes
@@ -307,6 +330,12 @@ Check the document root changes
     Configure    "php_version":"8.4"
     ${page} =    Fetch    /
     Should Contain    ${page}    NS8 LEMP is running
+
+Check the document root stays inside the site
+    FOR    ${root}    IN    ..    .    ../etc    public/..
+        ${output} =    Configure    "php_version":"8.4","document_root":"${root}"    rc_expected=10
+        Should Contain    ${output}    document_root
+    END
 
 Check the sender address changes
     Configure    "php_version":"8.4","mail_from":"web@example.org"

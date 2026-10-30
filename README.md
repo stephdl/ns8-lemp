@@ -12,7 +12,7 @@ Each instance serves one host name and owns one site database.
 | `php-fpm-app` | `ghcr.io/stephdl/lemp-php8.x` | PHP of the selected version |
 | `cron-app` | same image as `php-fpm-app` | cron jobs of the site |
 | `mariadb-app` | `docker.io/mariadb:12.3.3` | MariaDB LTS, supported until June 2029 |
-| `phpmyadmin-app` | `docker.io/phpmyadmin:5.2.3-fpm` | phpMyAdmin on `/phpmyadmin/` |
+| `phpmyadmin-app` | `docker.io/phpmyadmin:5.2.3-fpm` | phpMyAdmin on a random path, see [phpMyAdmin](#phpmyadmin) |
 
 PHP 8.2, 8.3, 8.4 and 8.5 are available. The node pulls only the selected version.
 
@@ -99,8 +99,8 @@ An update moves a size set in an older release to that file.
 `nginx_preset` gives the rules of the application:
 
 - `generic`: every unknown path goes to `index.php`. It fits most PHP frameworks.
-- `wordpress`: the same, plus WordPress hardening. `xmlrpc.php` is denied, and PHP files under
-  `wp-content/uploads/` never run.
+- `wordpress`: the same, plus WordPress hardening. `xmlrpc.php` and `wp-config.php` are denied,
+  PHP files under `wp-content/uploads/` never run, and the browser caches static files for 30 days.
 
 In both presets:
 
@@ -115,10 +115,29 @@ The module creates the site database and its user. PHP reads them in these varia
 
     LEMP_DB_HOST  LEMP_DB_PORT  LEMP_DB_NAME  LEMP_DB_USER  LEMP_DB_PASSWORD
 
-The `admin` account has all rights on every database. Use it in phpMyAdmin, at `https://<host>/phpmyadmin/`,
-to create other databases or users.
+The `admin` account has all rights on every database. Use it in phpMyAdmin to create other databases or users.
 
 The MariaDB `root` account works only inside `mariadb-app`. The module uses it for dumps and account changes.
+
+## phpMyAdmin
+
+phpMyAdmin is served on a random path of the site, like `https://<host>/07e1b87c3fa2/`.
+The Status page shows the link. Bots that scan `/phpmyadmin/` do not find it.
+
+The path changes each time phpMyAdmin is turned on in Settings, so a path that leaked stops working.
+Other changes, a clone, a move or a restore keep it.
+
+Read the path from the command line:
+
+    api-cli run module/lemp1/get-configuration | jq -r .phpmyadmin_path
+
+To protect it more:
+
+- install [CrowdSec](https://github.com/NethServer/ns8-crowdsec) on the node, it bans the clients that scan the site;
+- disable phpMyAdmin in Settings when nobody uses it, it gets a new path when you turn it back on.
+
+A failed phpMyAdmin login answers 200, so CrowdSec does not see a password guess on the login page.
+The random path and a strong `admin` password are the real protection.
 
 ## Deploy a site
 
@@ -127,7 +146,7 @@ The MariaDB `root` account works only inside `mariadb-app`. The module uses it f
 The site lives in the `app` volume, on `/app`.
 
 - `php-fpm-app` and `cron-app` can write to it.
-- `nginx-app` reads it only, and has no tools.
+- `nginx-app` reads it only, and has no git, curl or composer.
 
 So always add files through `php-fpm-app`, even for a static site. nginx then serves the static files itself.
 
@@ -157,11 +176,14 @@ Never call `phpinfo()` without arguments on a public page.
 
 A static file at `600` answers 403: nginx cannot read it.
 
-A shell opened without `-u www-data` runs as root. To fix the owner and the modes of the whole site:
+A shell opened without `-u www-data` runs as root. To fix the owner and the modes of the whole site,
+use Reset permissions in Settings, under Advanced, or:
 
-    runagent -m lemp1 podman exec php-fpm-app sh -c 'chown -R www-data:www-data /app && find /app -type d -exec chmod 755 {} + && find /app -type f -exec chmod 644 {} +'
+    api-cli run module/lemp1/reset-permissions
 
-It also sets the secrets back to `644`: run `chmod 600` on them again.
+It sets the owner, `755` on folders and `644` on files, for all of `/app`.
+A file that was executable, like a script run by cron, gets `755`. It works even when the site is stopped.
+Run `chmod 600` again on the secrets you keep at `600`.
 
 ### WordPress
 
@@ -191,7 +213,7 @@ What works with the preset:
 - pretty permalinks;
 - WP-Cron and the Site Health loopback test, because the site reaches itself through Traefik;
 - mail, through the cluster smarthost;
-- phpMyAdmin, on `https://<host>/phpmyadmin/` with the `admin` account.
+- phpMyAdmin, with the `admin` account.
 
 WP-CLI lives in `/tmp`, so it goes away when the container restarts. Download it again to use it.
 
@@ -340,6 +362,9 @@ The backup holds:
 - the secrets and the custom files.
 
 A restore on a cluster without the user domain drops the LDAP variables, with a warning.
+
+A restore keeps the host name, even when the original instance still runs on the same node.
+Both then share the host until you remove the original, or set a new host name on one of them.
 
 A clone keeps the host name of its source, but gets no web route. Set a new host name in Settings.
 

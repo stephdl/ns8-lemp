@@ -51,7 +51,8 @@
     "list-backup-repositories": "Elenca i repository di backup",
     "list-backups": "Elenca i backup",
     "list-installed-modules": "Elenca i moduli installati",
-    "restart-module": "Riavvia il modulo"
+    "restart-module": "Riavvia il modulo",
+    "reset-permissions": "Ripristina i permessi dei file"
   },
   "error": {
     "error": "Errore",
@@ -129,7 +130,7 @@
     "admin_password_mismatch": "Le password non coincidono",
     "admin_password_invalid": "La password non può contenere un a capo",
     "phpmyadmin": "phpMyAdmin",
-    "phpmyadmin_tooltip": "Servi phpMyAdmin su https://<host>/phpmyadmin/",
+    "phpmyadmin_tooltip": "Servi phpMyAdmin su un percorso casuale del sito, mostrato nella pagina Stato. Il percorso cambia a ogni attivazione",
     "user_domain_title": "Dominio utenti",
     "no_user_domain_title": "Nessun dominio utenti",
     "no_user_domain_description": "Crea un dominio utenti per dare le sue credenziali LDAP al sito.",
@@ -151,6 +152,10 @@
     "custom_files": "Configurazione personalizzata",
     "custom_files_title": "File personalizzati",
     "custom_files_description": "Aggiungi le tue impostazioni in questi file: nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf e crontab. Si trovano nella cartella state di {instance}, vengono caricati dopo le impostazioni del modulo, verificati prima di ogni riavvio e inclusi nei backup.",
+    "file_permissions": "Permessi dei file",
+    "file_permissions_description": "Restituisce i file del sito a www-data, con 755 sulle cartelle e 644 sui file. I file eseguibili passano a 755.",
+    "reset_permissions": "Ripristina i permessi",
+    "reset_permissions_warning": "Tutti i file e le cartelle in /app passano a www-data, con 755 sulle cartelle e 644 sui file. I file eseguibili passano a 755. I permessi impostati a mano vanno persi.",
     "advanced": "Avanzate",
     "web_server": "Server web",
     "php_tuning": "Ottimizzazione PHP",

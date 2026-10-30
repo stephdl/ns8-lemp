@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Give the site files back to www-data, readable by nginx
+
+set -e
+exec 1>&2
+
+if [[ -z "${PHP_IMAGE}" ]]; then
+    echo "The application is not configured yet"
+    exit 1
+fi
+
+# A throwaway container works on the volume even when php-fpm-app is stopped
+reset() {
+    podman run --rm --network=none --log-driver=none --volume app:/app:z --entrypoint= "$@"
+}
+
+# chown -h never follows a symlink out of /app
+reset --user root "${PHP_IMAGE}" chown -R -h www-data:www-data /app
+# chmod runs as www-data: a symlink swapped in by the site cannot reach a file of root.
+# X keeps the exec bit of scripts that already have one.
+reset --user www-data "${PHP_IMAGE}" chmod -R u=rwX,go=rX /app

@@ -6,6 +6,8 @@
 # The module settings in one place: configure, clone and restore all read this list
 
 import math
+import re
+import secrets
 
 # (configure-module field, environment variable, default, type)
 SETTINGS = [
@@ -33,6 +35,9 @@ MEMORY_LIMIT_MIB = (128, 4096)
 UPLOAD_MAX_FILESIZE_MIB = (2, 2048)
 MAX_EXECUTION_TIME = 3600
 FPM_MAX_CHILDREN = (1, 100)
+# Same pattern as configure-module: no . or .. segment, so nginx stays inside /app.
+# No lookahead: the agent checks the schema with Go regexp, which has none.
+DOCUMENT_ROOT_PATTERN = re.compile(r"^(([A-Za-z0-9_-][A-Za-z0-9._-]*|\.[A-Za-z0-9_-][A-Za-z0-9._-]*|\.\.[A-Za-z0-9._-]+)(/([A-Za-z0-9_-][A-Za-z0-9._-]*|\.[A-Za-z0-9_-][A-Za-z0-9._-]*|\.\.[A-Za-z0-9._-]+))*)?$")
 
 
 def size_mib(size):
@@ -56,6 +61,10 @@ def normalize(request):
     # current rules: the Settings page can show them and configure-module accepts them
     request["php_upload_max_filesize"] = clamp_size(request["php_upload_max_filesize"], UPLOAD_MAX_FILESIZE_MIB)
     request["php_memory_limit"] = clamp_size(request["php_memory_limit"], MEMORY_LIMIT_MIB)
+    # Drop "." segments saved by an older release, so ./public stays public.
+    # A ".." could point anywhere: serve /app rather than guess.
+    root = "/".join(s for s in request["document_root"].strip("/").split("/") if s != ".")
+    request["document_root"] = root if DOCUMENT_ROOT_PATTERN.fullmatch(root) else ""
     if not memory_fits_upload(request):
         upload = size_mib(request["php_upload_max_filesize"])
         request["php_memory_limit"] = clamp_size(f"{int(upload) * 2}M", MEMORY_LIMIT_MIB)
@@ -83,6 +92,17 @@ def request_from_env(env):
         else:
             request[field] = kind(value)
     return normalize(request)
+
+
+def new_phpmyadmin_path():
+    # A random path keeps phpMyAdmin out of the bots that scan /phpmyadmin/.
+    # No prefix: a path seen in a log or a screenshot does not tell what it serves.
+    return secrets.token_hex(6)
+
+
+def phpmyadmin_path(env):
+    # An instance without a path predates the random one
+    return env.get("PHPMYADMIN_PATH") or "phpmyadmin"
 
 
 def php_image(image_url, version):

@@ -14,6 +14,8 @@ request = json.load(sys.stdin)
 
 original_environment = request["environment"]
 
-for evar in lemp.ENV_VARS + ["DB_PASSWORD_SET", "ADMIN_PASSWORD_SET"]:
+# ROUTE_HOST makes the host check accept the backup's own host, so a restore next to a
+# running original succeeds, like other NS8 modules: Traefik then has two routes for it
+for evar in lemp.ENV_VARS + ["DB_PASSWORD_SET", "ADMIN_PASSWORD_SET", "PHPMYADMIN_PATH", "ROUTE_HOST"]:
     if evar in original_environment:
         agent.set_env(evar, original_environment[evar])

@@ -19,6 +19,7 @@ import shutil
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 import agent
+import lemp
 
 env = os.environ
 mode = sys.argv[1] if len(sys.argv) > 1 else ""
@@ -118,14 +119,16 @@ else:
     }"""
 
 phpmyadmin_locations = ""
-if env["PHPMYADMIN_ENABLED"] == "True":
+# Same default as SETTINGS: a restored environment may lack the variable
+if env.get("PHPMYADMIN_ENABLED", "True") == "True":
+    pma = lemp.phpmyadmin_path(env)
     phpmyadmin_locations = f"""
-    location = /phpmyadmin {{ return 301 /phpmyadmin/; }}
-    location ^~ /phpmyadmin/ {{
+    location = /{pma} {{ return 301 /{pma}/; }}
+    location ^~ /{pma}/ {{
         alias /srv/phpmyadmin/var/www/html/;
         index index.php;
-        location ~ ^/phpmyadmin/(libraries|setup|templates|vendor)/ {{ deny all; }}
-        location ~ ^/phpmyadmin/(.+\\.php)$ {{
+        location ~ ^/{pma}/(libraries|setup|templates|vendor)/ {{ deny all; }}
+        location ~ ^/{pma}/(.+\\.php)$ {{
             alias /srv/phpmyadmin/var/www/html/$1;
             fastcgi_pass 127.0.0.1:9001;
 {fastcgi_common}

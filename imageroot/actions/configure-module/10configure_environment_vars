@@ -13,8 +13,16 @@ import lemp
 
 data = json.load(sys.stdin)
 
+was_enabled = os.environ.get("PHPMYADMIN_ENABLED") == "True"
+
 for var, value in lemp.env_from_request(data).items():
     agent.set_env(var, value)
+
+# A new path each time phpMyAdmin is turned on: a path that leaked stops working.
+# Set here, not in create-module: a clone imports only the variables its new
+# instance lacks, and keeps the path of its source.
+if not os.environ.get("PHPMYADMIN_PATH") or (data["phpmyadmin_enabled"] and not was_enabled):
+    agent.set_env("PHPMYADMIN_PATH", lemp.new_phpmyadmin_path())
 
 
 def write_secret(path, key, value):

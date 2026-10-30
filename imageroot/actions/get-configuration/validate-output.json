@@ -17,6 +17,7 @@
         "php_timezone",
         "fpm_pm_max_children",
         "phpmyadmin_enabled",
+        "phpmyadmin_path",
         "db_name",
         "db_user",
         "db_password_set",
@@ -73,6 +74,10 @@
         },
         "phpmyadmin_enabled": {
             "type": "boolean"
+        },
+        "phpmyadmin_path": {
+            "type": "string",
+            "description": "URL path of phpMyAdmin, without slashes"
         },
         "db_name": {
             "type": "string"

@@ -37,6 +37,7 @@ config = {
     **settings,
     "lets_encrypt": route.get("lets_encrypt", False),
     "route_configured": bool(route),
+    "phpmyadmin_path": lemp.phpmyadmin_path(os.environ),
     "db_password_set": os.getenv("DB_PASSWORD_SET") == "True",
     "admin_password_set": os.getenv("ADMIN_PASSWORD_SET") == "True",
     "user_domains_list": sorted(Ldapproxy().get_domains_list()),

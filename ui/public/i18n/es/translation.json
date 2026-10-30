@@ -51,7 +51,8 @@
     "list-backup-repositories": "Listar los repositorios de copia de seguridad",
     "list-backups": "Listar las copias de seguridad",
     "list-installed-modules": "Listar los módulos instalados",
-    "restart-module": "Reiniciar el módulo"
+    "restart-module": "Reiniciar el módulo",
+    "reset-permissions": "Restablecer los permisos de archivos"
   },
   "error": {
     "error": "Error",
@@ -129,7 +130,7 @@
     "admin_password_mismatch": "Las contraseñas no coinciden",
     "admin_password_invalid": "La contraseña no puede contener un salto de línea",
     "phpmyadmin": "phpMyAdmin",
-    "phpmyadmin_tooltip": "Servir phpMyAdmin en https://<host>/phpmyadmin/",
+    "phpmyadmin_tooltip": "Servir phpMyAdmin en una ruta aleatoria del sitio, mostrada en la página Estado. La ruta cambia cada vez que se activa",
     "user_domain_title": "Dominio de usuarios",
     "no_user_domain_title": "Sin dominio de usuarios",
     "no_user_domain_description": "Cree un dominio de usuarios para dar sus credenciales LDAP al sitio.",
@@ -151,6 +152,10 @@
     "custom_files": "Configuración personalizada",
     "custom_files_title": "Archivos personalizados",
     "custom_files_description": "Añada sus propios ajustes en estos archivos: nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf y crontab. Están en la carpeta state de {instance}, se cargan después de los ajustes del módulo, se prueban antes de cada reinicio y se guardan en las copias de seguridad.",
+    "file_permissions": "Permisos de archivos",
+    "file_permissions_description": "Devuelve los archivos del sitio a www-data, con 755 en las carpetas y 644 en los archivos. Los archivos ejecutables pasan a 755.",
+    "reset_permissions": "Restablecer permisos",
+    "reset_permissions_warning": "Todos los archivos y carpetas de /app pasan a www-data, con 755 en las carpetas y 644 en los archivos. Los archivos ejecutables pasan a 755. Los permisos puestos a mano se pierden.",
     "advanced": "Avanzado",
     "web_server": "Servidor web",
     "php_tuning": "Ajustes de PHP",

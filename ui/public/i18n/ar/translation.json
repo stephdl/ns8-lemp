@@ -51,7 +51,8 @@
     "list-backup-repositories": "عرض مستودعات النسخ الاحتياطي",
     "list-backups": "عرض النسخ الاحتياطية",
     "list-installed-modules": "عرض الوحدات المثبتة",
-    "restart-module": "إعادة تشغيل الوحدة"
+    "restart-module": "إعادة تشغيل الوحدة",
+    "reset-permissions": "إعادة تعيين أذونات الملفات"
   },
   "error": {
     "error": "خطأ",
@@ -129,7 +130,7 @@
     "admin_password_mismatch": "كلمتا المرور غير متطابقتين",
     "admin_password_invalid": "لا يمكن أن تحتوي كلمة المرور على سطر جديد",
     "phpmyadmin": "phpMyAdmin",
-    "phpmyadmin_tooltip": "تقديم phpMyAdmin على https://<host>/phpmyadmin/",
+    "phpmyadmin_tooltip": "تقديم phpMyAdmin على مسار عشوائي للموقع، يظهر في صفحة الحالة. يتغير المسار عند كل تفعيل",
     "user_domain_title": "نطاق المستخدمين",
     "no_user_domain_title": "لا يوجد نطاق مستخدمين",
     "no_user_domain_description": "أنشئ نطاق مستخدمين لإعطاء بيانات اعتماد LDAP الخاصة به للموقع.",
@@ -151,6 +152,10 @@
     "custom_files": "إعدادات مخصصة",
     "custom_files_title": "الملفات المخصصة",
     "custom_files_description": "أضف إعداداتك في هذه الملفات: nginx/custom.d/*.conf و php/php.d/90-custom.ini و php/fpm.d/90-custom.conf و mariadb/90-custom.cnf و crontab. توجد في مجلد state الخاص بـ {instance}، وتُحمَّل بعد إعدادات الوحدة، وتُختبر قبل كل إعادة تشغيل، وتُحفظ في النسخ الاحتياطية.",
+    "file_permissions": "أذونات الملفات",
+    "file_permissions_description": "يعيد ملفات الموقع إلى المستخدم www-data، مع 755 للمجلدات و644 للملفات. تحصل الملفات القابلة للتنفيذ على 755.",
+    "reset_permissions": "إعادة تعيين الأذونات",
+    "reset_permissions_warning": "يصبح www-data مالك كل الملفات والمجلدات في /app، مع 755 للمجلدات و644 للملفات. تحصل الملفات القابلة للتنفيذ على 755. تضيع الأذونات المضبوطة يدويًا.",
     "advanced": "متقدم",
     "web_server": "خادم الويب",
     "php_tuning": "ضبط PHP",

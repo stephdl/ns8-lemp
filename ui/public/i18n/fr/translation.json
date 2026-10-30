@@ -51,7 +51,8 @@
     "list-backup-repositories": "Lister les dépôts de sauvegarde",
     "list-backups": "Lister les sauvegardes",
     "list-installed-modules": "Lister les modules installés",
-    "restart-module": "Redémarrer le module"
+    "restart-module": "Redémarrer le module",
+    "reset-permissions": "Réinitialiser les permissions des fichiers"
   },
   "error": {
     "error": "Erreur",
@@ -129,7 +130,7 @@
     "admin_password_mismatch": "Les mots de passe ne correspondent pas",
     "admin_password_invalid": "Le mot de passe ne peut pas contenir de saut de ligne",
     "phpmyadmin": "phpMyAdmin",
-    "phpmyadmin_tooltip": "Servir phpMyAdmin sur https://<hôte>/phpmyadmin/",
+    "phpmyadmin_tooltip": "Servir phpMyAdmin sur un chemin aléatoire du site, affiché sur la page État. Le chemin change à chaque activation",
     "user_domain_title": "Domaine utilisateur",
     "no_user_domain_title": "Aucun domaine utilisateur",
     "no_user_domain_description": "Créez un domaine utilisateur pour donner ses identifiants LDAP au site.",
@@ -151,6 +152,10 @@
     "custom_files": "Configuration personnalisée",
     "custom_files_title": "Fichiers personnalisés",
     "custom_files_description": "Ajoutez vos propres réglages dans ces fichiers : nginx/custom.d/*.conf, php/php.d/90-custom.ini, php/fpm.d/90-custom.conf, mariadb/90-custom.cnf et crontab. Ils sont dans le dossier state de {instance}, chargés après les réglages du module, testés avant chaque redémarrage et gardés dans les sauvegardes.",
+    "file_permissions": "Permissions des fichiers",
+    "file_permissions_description": "Rend les fichiers du site à www-data, avec 755 sur les dossiers et 644 sur les fichiers. Les fichiers exécutables passent en 755.",
+    "reset_permissions": "Réinitialiser les permissions",
+    "reset_permissions_warning": "Tous les fichiers et dossiers de /app passent à www-data, en 755 pour les dossiers et 644 pour les fichiers. Les fichiers exécutables passent en 755. Les modes réglés à la main sont perdus.",
     "advanced": "Avancé",
     "web_server": "Serveur web",
     "php_tuning": "Réglages PHP",
