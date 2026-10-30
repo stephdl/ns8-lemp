@@ -77,6 +77,7 @@ export default {
       const res = await to(
         this.createModuleTaskForApp(this.instanceName, {
           action: taskAction,
+          data: {},
           extra: {
             title: this.$t("action.reset-permissions"),
             eventId,
