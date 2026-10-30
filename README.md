@@ -99,8 +99,8 @@ An update moves a size set in an older release to that file.
 `nginx_preset` gives the rules of the application:
 
 - `generic`: every unknown path goes to `index.php`. It fits most PHP frameworks.
-- `wordpress`: the same, plus WordPress hardening. `xmlrpc.php` is denied, and PHP files under
-  `wp-content/uploads/` never run.
+- `wordpress`: the same, plus WordPress hardening. `xmlrpc.php` and `wp-config.php` are denied,
+  PHP files under `wp-content/uploads/` never run, and the browser caches static files for 30 days.
 
 In both presets:
 
@@ -143,7 +143,7 @@ The random path and a strong `admin` password are the real protection.
 The site lives in the `app` volume, on `/app`.
 
 - `php-fpm-app` and `cron-app` can write to it.
-- `nginx-app` reads it only, and has no tools.
+- `nginx-app` reads it only, and has no git, curl or composer.
 
 So always add files through `php-fpm-app`, even for a static site. nginx then serves the static files itself.
 
