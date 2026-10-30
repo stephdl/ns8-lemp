@@ -360,6 +360,9 @@ The backup holds:
 
 A restore on a cluster without the user domain drops the LDAP variables, with a warning.
 
+A restore keeps the host name, even when the original instance still runs on the same node.
+Both then share the host until you remove the original, or set a new host name on one of them.
+
 A clone keeps the host name of its source, but gets no web route. Set a new host name in Settings.
 
 ## Volumes
