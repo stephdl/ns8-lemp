@@ -308,6 +308,12 @@ Check the document root changes
     ${page} =    Fetch    /
     Should Contain    ${page}    NS8 LEMP is running
 
+Check the document root stays inside the site
+    FOR    ${root}    IN    ..    .    ../etc    public/..
+        ${output} =    Configure    "php_version":"8.4","document_root":"${root}"    rc_expected=10
+        Should Contain    ${output}    document_root
+    END
+
 Check the sender address changes
     Configure    "php_version":"8.4","mail_from":"web@example.org"
     ${output} =    In the module    podman exec php-fpm-app printenv MAIL_FROM

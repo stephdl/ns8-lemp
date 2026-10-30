@@ -60,8 +60,8 @@
         },
         "document_root": {
             "type": "string",
-            "description": "Subdirectory of /app served by nginx, empty for /app itself",
-            "pattern": "^([A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*)?$",
+            "description": "Subdirectory of /app served by nginx, empty for /app itself, no . or .. segment",
+            "pattern": "^([A-Za-z0-9._-]*[A-Za-z0-9_-][A-Za-z0-9._-]*(/[A-Za-z0-9._-]*[A-Za-z0-9_-][A-Za-z0-9._-]*)*)?$",
             "maxLength": 255
         },
         "nginx_preset": {
