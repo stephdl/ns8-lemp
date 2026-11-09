@@ -30,7 +30,7 @@ php_images=(
     "docker.io/php:8.4.27-fpm-trixie"
     "docker.io/php:8.5.12-fpm-trixie"
 )
-composer_image="docker.io/composer:2.10.3"
+composer_image="docker.io/composer:2.11.0"
 node_image="docker.io/library/node:26.13.0-slim"
 extension_installer_image="docker.io/mlocati/php-extension-installer:2.12.6"
 
