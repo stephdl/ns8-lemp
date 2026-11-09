@@ -32,7 +32,7 @@ php_images=(
 )
 composer_image="docker.io/composer:2.10.3"
 node_image="docker.io/library/node:26.13.0-slim"
-extension_installer_image="docker.io/mlocati/php-extension-installer:2.12.6"
+extension_installer_image="docker.io/mlocati/php-extension-installer:2.13.2"
 
 # The About page shows the stack versions: the module version does not tell them
 metadata_file="ui/public/metadata.json"
