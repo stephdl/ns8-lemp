@@ -14,6 +14,9 @@ images=()
 repobase="${REPOBASE:-ghcr.io/nethserver}"
 # Configure the image name
 reponame="lemp"
+# Node.js 25+ no longer ships Corepack, install it from npm
+# renovate: datasource=npm packageName=corepack
+corepack_version=0.36.0
 
 # Runtime images, pulled by the module
 mariadb_image="docker.io/mariadb:12.3.3"
@@ -28,7 +31,7 @@ php_images=(
     "docker.io/php:8.5.12-fpm-trixie"
 )
 composer_image="docker.io/composer:2.10.3"
-node_image="docker.io/library/node:24.22.2"
+node_image="docker.io/library/node:26.13.0-slim"
 extension_installer_image="docker.io/mlocati/php-extension-installer:2.12.6"
 
 # The About page shows the stack versions: the module version does not tell them
@@ -74,6 +77,7 @@ container=$(buildah from scratch)
 if ! buildah containers --format "{{.ContainerName}}" | grep -q nodebuilder-lemp; then
     echo "Pulling NodeJS runtime..."
     buildah from --name nodebuilder-lemp -v "${PWD}:/usr/src:Z" "${node_image}"
+    buildah run nodebuilder-lemp sh -c "npm install -g corepack@${corepack_version} && corepack enable"
 fi
 
 echo "Build static UI files with node..."
@@ -81,7 +85,7 @@ buildah run \
     --workingdir=/usr/src/ui \
     --env="NODE_OPTIONS=--openssl-legacy-provider" \
     nodebuilder-lemp \
-    sh -c "corepack enable && yarn install && yarn build"
+    sh -c "yarn install && yarn build"
 
 # Add imageroot directory to the container image
 buildah add "${container}" imageroot /imageroot
