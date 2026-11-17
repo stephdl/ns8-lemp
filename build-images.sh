@@ -31,7 +31,7 @@ php_images=(
     "docker.io/php:8.5.12-fpm-trixie"
 )
 composer_image="docker.io/composer:2.11.2"
-node_image="docker.io/library/node:26.13.0-slim"
+node_image="docker.io/library/node:26.13.1-slim"
 extension_installer_image="docker.io/mlocati/php-extension-installer:2.13.2"
 
 # The About page shows the stack versions: the module version does not tell them
