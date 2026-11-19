@@ -8,7 +8,7 @@ Each instance serves one host name and owns one site database.
 
 | Container | Image | Role |
 |---|---|---|
-| `nginx-app` | `docker.io/nginx:1.30.6` | web server, behind Traefik |
+| `nginx-app` | `docker.io/nginx:1.30.7` | web server, behind Traefik |
 | `php-fpm-app` | `ghcr.io/stephdl/lemp-php8.x` | PHP of the selected version |
 | `cron-app` | same image as `php-fpm-app` | cron jobs of the site |
 | `mariadb-app` | `docker.io/mariadb:12.3.3` | MariaDB LTS, supported until June 2029 |
