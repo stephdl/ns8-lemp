@@ -20,7 +20,7 @@ corepack_version=0.36.0
 
 # Runtime images, pulled by the module
 mariadb_image="docker.io/mariadb:12.3.3"
-nginx_image="docker.io/nginx:1.30.6"
+nginx_image="docker.io/nginx:1.30.7"
 phpmyadmin_image="docker.io/phpmyadmin:5.2.3-fpm"
 
 # Bases of the PHP-FPM images built below, one per supported PHP branch
